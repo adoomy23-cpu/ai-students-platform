@@ -78,13 +78,7 @@ export default async function Home() {
               <div className="cardIcon">{item.icon}</div>
               <h4>{item.title}</h4>
               <p>{item.text}</p>
-              <button>{item.title === "تعلّم واستكشف" ? (
-  <a href="/content" style={{ color: "inherit", textDecoration: "none" }}>
-    {item.badge}
-  </a>
-) : (
-  item.badge
-)} ←</button>
+              <button>{item.badge} ←</button>
             </article>
           ))}
         </div>
