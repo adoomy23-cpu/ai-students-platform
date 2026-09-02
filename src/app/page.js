@@ -1,6 +1,6 @@
+import { connection } from "next/server";
 import { supabase } from "../lib/supabase";
 
-export const dynamic = "force-dynamic";
 
 ;const sections = [
   { icon: "🧠", title: "تعلّم واستكشف", text: "دروس ومعلومات ممتعة عن عالم الذكاء الاصطناعي.", badge: "ابدأ التعلّم" },
@@ -13,6 +13,7 @@ export const dynamic = "force-dynamic";
 
 
 export default async function Home() {
+  await connection();
     const { data: quizzes } = await supabase
         .from("quizzes")
             .select("id,title,status")
@@ -105,7 +106,7 @@ export default async function Home() {
                                             <div className="cardIcon">📝</div>
                                                     <h4>{quiz.title}</h4>
                                                             <p>اختبار متاح الآن</p>
-                                                                    <button>ابدأ الاختبار ←</button>
+                                                                    <a href={`/q?quiz=${quiz.id}`}><button>ابدأ الاختبار</button></a>
                                                                           </article>
                                                                               ))}
                                                                                 </div>
