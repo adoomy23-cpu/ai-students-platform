@@ -18,10 +18,7 @@ export default function ChallengeDetailsPage() {
   const [studentId, setStudentId] = useState("");
 
   const [submissionText, setSubmissionText] = useState("");
-  
-  const [imageFile, setImageFile] = useState(null);
-  const [fileFile, setFileFile] = useState(null);
-const [imageUrl, setImageUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [fileUrl, setFileUrl] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -107,8 +104,8 @@ const [imageUrl, setImageUrl] = useState("");
 
     const hasContent =
       submissionText.trim() ||
-      imageFile ||
-      fileFile;
+      imageUrl.trim() ||
+      fileUrl.trim();
 
     if (!hasContent) {
       setMessage("أضف مشاركة واحدة على الأقل قبل الإرسال.");
@@ -118,47 +115,6 @@ const [imageUrl, setImageUrl] = useState("");
     setSending(true);
     setMessage("");
 
-    let uploadedImagePath = null;
-    let uploadedFilePath = null;
-
-    try {
-      const basePath = `challenges/${challengeId}/${studentId}`;
-
-      if (challenge?.allow_image && imageFile) {
-        const ext = imageFile.name.split(".").pop() || "jpg";
-        const imagePath = `${basePath}/${Date.now()}-image.${ext}`;
-
-        const { error: imageUploadError } = await supabase.storage
-          .from("student-private")
-          .upload(imagePath, imageFile, {
-            cacheControl: "3600",
-            upsert: false,
-          });
-
-        if (imageUploadError) throw imageUploadError;
-        uploadedImagePath = imagePath;
-      }
-
-      if (challenge?.allow_file && fileFile) {
-        const safeName = fileFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        const filePath = `${basePath}/${Date.now()}-${safeName}`;
-
-        const { error: fileUploadError } = await supabase.storage
-          .from("student-private")
-          .upload(filePath, fileFile, {
-            cacheControl: "3600",
-            upsert: false,
-          });
-
-        if (fileUploadError) throw fileUploadError;
-        uploadedFilePath = filePath;
-      }
-    } catch (uploadError) {
-      setMessage("تعذر رفع الملف: " + uploadError.message);
-      setSending(false);
-      return;
-    }
-
     const payload = {
       challenge_id: challengeId,
       student_id: Number(studentId),
@@ -166,8 +122,14 @@ const [imageUrl, setImageUrl] = useState("");
         challenge?.allow_text && submissionText.trim()
           ? submissionText.trim()
           : null,
-      image_url: uploadedImagePath,
-      file_url: uploadedFilePath,
+      image_url:
+        challenge?.allow_image && imageUrl.trim()
+          ? imageUrl.trim()
+          : null,
+      file_url:
+        challenge?.allow_file && fileUrl.trim()
+          ? fileUrl.trim()
+          : null,
       status: "submitted",
     };
 
@@ -182,8 +144,6 @@ const [imageUrl, setImageUrl] = useState("");
       setSubmissionText("");
       setImageUrl("");
       setFileUrl("");
-      setImageFile(null);
-      setFileFile(null);
     }
 
     setSending(false);
@@ -377,16 +337,16 @@ const [imageUrl, setImageUrl] = useState("");
           {challenge.allow_image && (
             <div>
               <label style={styles.label}>
-                📷 اختر صورة من جهازك
+                🖼️ رابط الصورة
               </label>
 
               <input
-                type="file"
-                accept="image/*"
+                value={imageUrl}
                 onChange={(e) =>
-                  setImageFile(e.target.files?.[0] || null)
+                  setImageUrl(e.target.value)
                 }
                 style={styles.input}
+                placeholder="https://..."
               />
             </div>
           )}
@@ -394,15 +354,16 @@ const [imageUrl, setImageUrl] = useState("");
           {challenge.allow_file && (
             <div>
               <label style={styles.label}>
-                📎 اختر ملفًا من جهازك
+                📎 رابط الملف
               </label>
 
               <input
-                type="file"
+                value={fileUrl}
                 onChange={(e) =>
-                  setFileFile(e.target.files?.[0] || null)
+                  setFileUrl(e.target.value)
                 }
                 style={styles.input}
+                placeholder="https://..."
               />
             </div>
           )}

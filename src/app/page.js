@@ -1,4 +1,7 @@
 import { supabase } from "../lib/supabase";
+
+export const dynamic = "force-dynamic";
+
 ;const sections = [
   { icon: "🧠", title: "تعلّم واستكشف", text: "دروس ومعلومات ممتعة عن عالم الذكاء الاصطناعي.", badge: "ابدأ التعلّم" },
   { icon: "🏆", title: "التحديات والمسابقات", text: "شارك بأفكارك وأعمالك وأظهر إبداعك.", badge: "شاهد التحديات" },
