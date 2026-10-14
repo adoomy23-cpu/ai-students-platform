@@ -5,6 +5,16 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
+async function requestQuiz(quizId) {
+  const { data, error } = await supabase.rpc(
+        "get_quiz_for_student",
+        {
+          p_quiz_id: quizId,
+        }
+      );
+  return { data, error };
+}
+
 export default function QuizPage() {
   const params = useParams();
   const quizId = Number(params?.id);
@@ -20,15 +30,8 @@ export default function QuizPage() {
     if (!Number.isSafeInteger(quizId) || quizId <= 0) return;
     let active = true;
 
-    async function loadQuiz() {
-
-      const { data, error } = await supabase.rpc(
-        "get_quiz_for_student",
-        {
-          p_quiz_id: quizId,
-        }
-      );
-
+    requestQuiz(quizId)
+      .then(({ data, error }) => {
       if (!active) return;
       setLoadedQuizId(quizId);
       setError("");
@@ -50,9 +53,13 @@ export default function QuizPage() {
       setQuiz(data.quiz);
       setQuestions(data.questions || []);
       setLoading(false);
-    }
-
-    loadQuiz();
+      })
+      .catch(() => {
+      if (!active) return;
+      setLoadedQuizId(quizId);
+      setError("تعذر تحميل الاختبار. حاول مرة أخرى لاحقًا.");
+      setLoading(false);
+      });
     return () => { active = false; };
   }, [quizId]);
 

@@ -5,6 +5,15 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 
+async function requestData() {
+  const { data, error } = await supabase
+      .from("learning_content")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("id", { ascending: false });
+  return { data, error };
+}
+
 export default function ContentPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,14 +32,7 @@ export default function ContentPage() {
     sort_order: 0,
   });
 
-  const loadContent = useCallback(async () => {
-
-    const { data, error } = await supabase
-      .from("learning_content")
-      .select("*")
-      .order("sort_order", { ascending: true })
-      .order("id", { ascending: false });
-
+  const receiveData = useCallback(({ data, error }) => {
     if (error) {
       console.error(error);
       setMessage("❌ تعذر تحميل المحتوى.");
@@ -41,9 +43,22 @@ export default function ContentPage() {
     setLoading(false);
   }, []);
 
+  const handleLoadError = useCallback(() => {
+    setMessage("تعذر الاتصال لتحميل البيانات. حاول مرة أخرى لاحقًا.");
+    setLoading(false);
+  }, []);
+
+  const loadContent = useCallback(() => {
+    return requestData().then(receiveData).catch(handleLoadError);
+  }, [receiveData, handleLoadError]);
+
   useEffect(() => {
-    loadContent();
-  }, [loadContent]);
+    let active = true;
+    requestData()
+      .then((response) => { if (active) receiveData(response); })
+      .catch(() => { if (active) handleLoadError(); });
+    return () => { active = false; };
+  }, [receiveData, handleLoadError]);
 
   function changeField(name, value) {
     setForm((old) => ({

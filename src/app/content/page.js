@@ -5,20 +5,22 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
-export default function ContentPage() {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const loadContent = useCallback(async () => {
-
-    const { data, error } = await supabase
+async function requestData() {
+  const { data, error } = await supabase
       .from("learning_content")
       .select("*")
       .eq("status", "published")
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false });
+  return { data, error };
+}
 
+export default function ContentPage() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const receiveData = useCallback(({ data, error }) => {
     if (error) {
       console.error(error);
       setError("تعذر تحميل المحتوى حاليًا.");
@@ -31,9 +33,18 @@ export default function ContentPage() {
     setLoading(false);
   }, []);
 
+  const handleLoadError = useCallback(() => {
+    setError("تعذر الاتصال لتحميل البيانات. حاول مرة أخرى لاحقًا.");
+    setLoading(false);
+  }, []);
+
   useEffect(() => {
-    loadContent();
-  }, [loadContent]);
+    let active = true;
+    requestData()
+      .then((response) => { if (active) receiveData(response); })
+      .catch(() => { if (active) handleLoadError(); });
+    return () => { active = false; };
+  }, [receiveData, handleLoadError]);
 
   function typeName(type) {
     if (type === "video") return "🎬 فيديو";

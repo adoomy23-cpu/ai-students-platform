@@ -4,17 +4,19 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 
+async function requestData() {
+  const { data, error } = await supabase
+      .rpc("get_admin_quiz_results");
+  return { data, error };
+}
+
 export default function AdminResultsPage() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
-  const loadResults = useCallback(async () => {
-
-    const { data, error } = await supabase
-      .rpc("get_admin_quiz_results");
-
+  const receiveData = useCallback(({ data, error }) => {
     if (error) {
       console.error(error);
       setError("تعذر تحميل النتائج");
@@ -27,9 +29,22 @@ export default function AdminResultsPage() {
     setLoading(false);
   }, []);
 
+  const handleLoadError = useCallback(() => {
+    setError("تعذر الاتصال لتحميل البيانات. حاول مرة أخرى لاحقًا.");
+    setLoading(false);
+  }, []);
+
+  const loadResults = useCallback(() => {
+    return requestData().then(receiveData).catch(handleLoadError);
+  }, [receiveData, handleLoadError]);
+
   useEffect(() => {
-    loadResults();
-  }, [loadResults]);
+    let active = true;
+    requestData()
+      .then((response) => { if (active) receiveData(response); })
+      .catch(() => { if (active) handleLoadError(); });
+    return () => { active = false; };
+  }, [receiveData, handleLoadError]);
 
   const rows = useMemo(() => {
     return results.map((item) => {

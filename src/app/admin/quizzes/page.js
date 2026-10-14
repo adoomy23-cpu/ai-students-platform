@@ -4,6 +4,15 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 
+async function requestData() {
+  const { data, error } = await supabase
+      .from("quizzes")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false });
+  return { data, error };
+}
+
 export default function AdminQuizzesPage() {
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,14 +33,7 @@ export default function AdminQuizzesPage() {
     sort_order: 0,
   });
 
-  const loadQuizzes = useCallback(async () => {
-
-    const { data, error } = await supabase
-      .from("quizzes")
-      .select("*")
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: false });
-
+  const receiveData = useCallback(({ data, error }) => {
     if (error) {
       console.error(error);
       setMessage("❌ تعذر تحميل الاختبارات: " + error.message);
@@ -42,9 +44,22 @@ export default function AdminQuizzesPage() {
     setLoading(false);
   }, []);
 
+  const handleLoadError = useCallback(() => {
+    setMessage("تعذر الاتصال لتحميل البيانات. حاول مرة أخرى لاحقًا.");
+    setLoading(false);
+  }, []);
+
+  const loadQuizzes = useCallback(() => {
+    return requestData().then(receiveData).catch(handleLoadError);
+  }, [receiveData, handleLoadError]);
+
   useEffect(() => {
-    loadQuizzes();
-  }, [loadQuizzes]);
+    let active = true;
+    requestData()
+      .then((response) => { if (active) receiveData(response); })
+      .catch(() => { if (active) handleLoadError(); });
+    return () => { active = false; };
+  }, [receiveData, handleLoadError]);
 
   function updateField(name, value) {
     setForm((old) => ({

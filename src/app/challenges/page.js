@@ -5,27 +5,44 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-export default function ChallengesPage() {
-  const [challenges, setChallenges] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const loadChallenges = useCallback(async () => {
-
-    const { data, error } = await supabase
+async function requestData() {
+  const { data, error } = await supabase
       .from("challenges")
       .select("*")
       .eq("status", "published")
       .order("is_featured", { ascending: false })
       .order("sort_order", { ascending: true });
+  return { data, error };
+}
 
-    if (!error) setChallenges(data || []);
+export default function ChallengesPage() {
+  const [challenges, setChallenges] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const receiveData = useCallback(({ data, error }) => {
+    if (error) {
+      setError("تعذر تحميل التحديات. حاول مرة أخرى لاحقًا.");
+    } else {
+      setError("");
+      setChallenges(data || []);
+    }
 
     setLoading(false);
   }, []);
 
+  const handleLoadError = useCallback(() => {
+    setError("تعذر الاتصال لتحميل البيانات. حاول مرة أخرى لاحقًا.");
+    setLoading(false);
+  }, []);
+
   useEffect(() => {
-    loadChallenges();
-  }, [loadChallenges]);
+    let active = true;
+    requestData()
+      .then((response) => { if (active) receiveData(response); })
+      .catch(() => { if (active) handleLoadError(); });
+    return () => { active = false; };
+  }, [receiveData, handleLoadError]);
 
   return (
     <main style={styles.page} dir="rtl">
@@ -61,6 +78,8 @@ export default function ChallengesPage() {
 
         {loading ? (
           <div style={styles.message}>جاري تحميل التحديات...</div>
+        ) : error ? (
+          <div role="alert" style={styles.message}>{error}</div>
         ) : challenges.length === 0 ? (
           <div style={styles.empty}>
             <div style={styles.emptyIcon}>🏆</div>

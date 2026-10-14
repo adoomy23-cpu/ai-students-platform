@@ -4,6 +4,25 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+async function requestData() {
+  const [gradesResult, classroomsResult, studentsResult] =
+      await Promise.all([
+        supabase.from("grades").select("id,name").order("id"),
+
+        supabase
+          .from("classrooms")
+          .select("id,grade_id,name,is_active,sort_order")
+          .order("grade_id")
+          .order("sort_order"),
+
+        supabase
+          .from("students")
+          .select("id,classroom_id,student_name,is_active,created_at")
+          .order("student_name"),
+      ]);
+  return { gradesResult, classroomsResult, studentsResult };
+}
+
 export default function StudentsPage() {
   const [grades, setGrades] = useState([]);
   const [classrooms, setClassrooms] = useState([]);
@@ -21,24 +40,7 @@ export default function StudentsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  const loadData = useCallback(async () => {
-
-    const [gradesResult, classroomsResult, studentsResult] =
-      await Promise.all([
-        supabase.from("grades").select("id,name").order("id"),
-
-        supabase
-          .from("classrooms")
-          .select("id,grade_id,name,is_active,sort_order")
-          .order("grade_id")
-          .order("sort_order"),
-
-        supabase
-          .from("students")
-          .select("id,classroom_id,student_name,is_active,created_at")
-          .order("student_name"),
-      ]);
-
+  const receiveData = useCallback(({ gradesResult, classroomsResult, studentsResult }) => {
     if (
       gradesResult.error ||
       classroomsResult.error ||
@@ -58,9 +60,22 @@ export default function StudentsPage() {
     setLoading(false);
   }, []);
 
+  const handleLoadError = useCallback(() => {
+    setMessage("تعذر الاتصال لتحميل البيانات. حاول مرة أخرى لاحقًا.");
+    setLoading(false);
+  }, []);
+
+  const loadData = useCallback(() => {
+    return requestData().then(receiveData).catch(handleLoadError);
+  }, [receiveData, handleLoadError]);
+
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    let active = true;
+    requestData()
+      .then((response) => { if (active) receiveData(response); })
+      .catch(() => { if (active) handleLoadError(); });
+    return () => { active = false; };
+  }, [receiveData, handleLoadError]);
 
   const availableClassrooms = useMemo(() => {
     return classrooms.filter(

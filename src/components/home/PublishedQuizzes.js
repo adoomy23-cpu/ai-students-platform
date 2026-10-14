@@ -3,6 +3,12 @@ import { createElement as h, useEffect, useState } from "react";
 import Link from "next/link";
 import { readPublishedQuizzes } from "../../lib/published-quizzes.mjs";
 import Icon from "../ui/Icon";
+
+async function requestPublishedQuizzes() {
+  const { supabase } = await import("../../lib/supabase");
+  return readPublishedQuizzes(supabase);
+}
+
 export default function PublishedQuizzes() {
   const configured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
   const [state, setState] = useState(() => ({ status: configured ? "loading" : "unavailable", quizzes: [] }));
@@ -10,16 +16,9 @@ export default function PublishedQuizzes() {
   useEffect(() => {
     if (!configured) return;
     let active = true;
-    async function load() {
-      try {
-        const { supabase } = await import("../../lib/supabase");
-        const result = await readPublishedQuizzes(supabase);
-        if (active) setState(result);
-      } catch {
-        if (active) setState({ status: "error", quizzes: [] });
-      }
-    }
-    load();
+    requestPublishedQuizzes()
+      .then((result) => { if (active) setState(result); })
+      .catch(() => { if (active) setState({ status: "error", quizzes: [] }); });
     return () => { active = false; };
   }, [configured, retry]);
   if (state.status === "ready") {

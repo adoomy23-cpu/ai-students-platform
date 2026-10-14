@@ -4,6 +4,20 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+async function requestData() {
+  const { data: gradesData, error: gradesError } = await supabase
+      .from("grades")
+      .select("id,name")
+      .order("id");
+
+  const { data: classroomsData, error: classroomsError } = await supabase
+      .from("classrooms")
+      .select("id,grade_id,name,is_active,sort_order,grades(name)")
+      .order("grade_id")
+      .order("sort_order");
+  return { gradesData, gradesError, classroomsData, classroomsError };
+}
+
 export default function ClassroomsPage() {
   const [grades, setGrades] = useState([]);
   const [classrooms, setClassrooms] = useState([]);
@@ -13,19 +27,7 @@ export default function ClassroomsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  const loadData = useCallback(async () => {
-
-    const { data: gradesData, error: gradesError } = await supabase
-      .from("grades")
-      .select("id,name")
-      .order("id");
-
-    const { data: classroomsData, error: classroomsError } = await supabase
-      .from("classrooms")
-      .select("id,grade_id,name,is_active,sort_order,grades(name)")
-      .order("grade_id")
-      .order("sort_order");
-
+  const receiveData = useCallback(({ gradesData, gradesError, classroomsData, classroomsError }) => {
     if (gradesError || classroomsError) {
       setMessage("تعذر تحميل البيانات.");
     } else {
@@ -40,9 +42,22 @@ export default function ClassroomsPage() {
     setLoading(false);
   }, []);
 
+  const handleLoadError = useCallback(() => {
+    setMessage("تعذر الاتصال لتحميل البيانات. حاول مرة أخرى لاحقًا.");
+    setLoading(false);
+  }, []);
+
+  const loadData = useCallback(() => {
+    return requestData().then(receiveData).catch(handleLoadError);
+  }, [receiveData, handleLoadError]);
+
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    let active = true;
+    requestData()
+      .then((response) => { if (active) receiveData(response); })
+      .catch(() => { if (active) handleLoadError(); });
+    return () => { active = false; };
+  }, [receiveData, handleLoadError]);
 
   async function addClassroom(e) {
     e.preventDefault();

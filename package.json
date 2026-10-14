@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node tests/published-quizzes.test.mjs"
+    "test": "node tests/published-quizzes.test.mjs && node tests/effect-responses.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",

@@ -5,38 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function ChallengeDetailsPage() {
-  const params = useParams();
-  const challengeId = Number(params?.id);
-
-  const [challenge, setChallenge] = useState(null);
-  const [loadedChallengeId, setLoadedChallengeId] = useState(null);
-  const [grades, setGrades] = useState([]);
-  const [classrooms, setClassrooms] = useState([]);
-  const [students, setStudents] = useState([]);
-
-  const [gradeId, setGradeId] = useState("");
-  const [classroomId, setClassroomId] = useState("");
-  const [studentId, setStudentId] = useState("");
-
-  const [submissionText, setSubmissionText] = useState("");
-  
-  const [imageFile, setImageFile] = useState(null);
-  const [fileFile, setFileFile] = useState(null);
-const [imageUrl, setImageUrl] = useState("");
-  const [fileUrl, setFileUrl] = useState("");
-
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    if (!Number.isSafeInteger(challengeId) || challengeId <= 0) return;
-    let active = true;
-
-    async function loadPage() {
-
-      const [
+async function requestPage(challengeId) {
+  const [
         challengeResult,
         gradesResult,
         classroomsResult,
@@ -65,7 +35,40 @@ const [imageUrl, setImageUrl] = useState("");
           .eq("is_active", true)
           .order("student_name"),
       ]);
+  return { challengeResult, gradesResult, classroomsResult, studentsResult };
+}
 
+export default function ChallengeDetailsPage() {
+  const params = useParams();
+  const challengeId = Number(params?.id);
+
+  const [challenge, setChallenge] = useState(null);
+  const [loadedChallengeId, setLoadedChallengeId] = useState(null);
+  const [grades, setGrades] = useState([]);
+  const [classrooms, setClassrooms] = useState([]);
+  const [students, setStudents] = useState([]);
+
+  const [gradeId, setGradeId] = useState("");
+  const [classroomId, setClassroomId] = useState("");
+  const [studentId, setStudentId] = useState("");
+
+  const [submissionText, setSubmissionText] = useState("");
+
+  const [imageFile, setImageFile] = useState(null);
+  const [fileFile, setFileFile] = useState(null);
+const [imageUrl, setImageUrl] = useState("");
+  const [fileUrl, setFileUrl] = useState("");
+
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (!Number.isSafeInteger(challengeId) || challengeId <= 0) return;
+    let active = true;
+
+    requestPage(challengeId)
+      .then(({ challengeResult, gradesResult, classroomsResult, studentsResult }) => {
       if (!active) return;
       setLoadedChallengeId(challengeId);
       setMessage("");
@@ -81,9 +84,14 @@ const [imageUrl, setImageUrl] = useState("");
       setStudents(studentsResult.data || []);
 
       setLoading(false);
-    }
-
-    loadPage();
+      })
+      .catch(() => {
+      if (!active) return;
+      setLoadedChallengeId(challengeId);
+      setChallenge(null);
+      setMessage("تعذر تحميل التحدي. حاول مرة أخرى لاحقًا.");
+      setLoading(false);
+      });
     return () => { active = false; };
   }, [challengeId]);
 
