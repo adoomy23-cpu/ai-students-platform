@@ -15,7 +15,7 @@ export async function fetchAccountAccess(token, { signal, fetcher = fetch } = {}
     if (body.authenticated !== true || !["admin", "student", null].includes(body.role)) return { status: "error", role: null };
     if (body.role === "student" && (body.student?.state !== "approved" || !Number.isSafeInteger(body.student.profile?.id) || body.student.profile.id <= 0)) return { status: "error", role: null };
     if (body.student && !["approved", "pending", "suspended", "rejected", "missing", "profile_unavailable", "verification_failed"].includes(body.student.state)) return { status: "error", role: null };
-    if (body.student?.state === "verification_failed") return { status: "error", role: null, student: body.student };
+    if (["verification_failed", "profile_unavailable"].includes(body.student?.state)) return { status: "error", role: null, student: body.student };
     return { status: "authenticated", role: body.role, ...(body.student ? { student: body.student } : {}) };
   } catch { return { status: "error", role: null }; }
 }

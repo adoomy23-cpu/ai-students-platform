@@ -18,7 +18,7 @@ export default function StudentStatus() {
       <Feedback tone={state === "pending" || state === "missing" ? "info" : "error"}>{studentMessages[state] || "تعذر الاتصال أو التحقق من حالة حسابك. لن تُتاح وظائف الطلاب حتى ينجح التحقق."}</Feedback>
       <div className={styles.actions}>
         <Button icon="clock" onClick={access.refresh}>تحديث الحالة</Button>
-        {["missing", "profile_unavailable"].includes(state) && <ActionLink href="/complete-profile" variant="secondary">الملف الدراسي</ActionLink>}
+        {state === "missing" && <ActionLink href="/complete-profile" variant="secondary">الملف الدراسي</ActionLink>}
         {access.canSignOut && <Button variant="secondary" icon="logout" onClick={access.signOut} disabled={access.signingOut}>تسجيل الخروج</Button>}
       </div>
     </>}

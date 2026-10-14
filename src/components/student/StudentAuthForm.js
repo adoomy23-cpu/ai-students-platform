@@ -1,21 +1,16 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAccess } from "../platform/AuthProvider";
-import { fetchAccountAccess } from "../../lib/auth/access-client.mjs";
-import { studentDestination } from "../../lib/student/profile.mjs";
+import { useState } from "react";
+import { useStudentAccountRedirect } from "./useStudentAccountRedirect";
 import { authMessage, loadStudentClient } from "../../lib/student/browser-client";
 import { ActionLink, Button, Feedback, Input } from "../platform/PlatformUI";
 import AccountPage from "./AccountPage";
 import StudentStatus from "./StudentStatus";
 import styles from "./accounts.module.css";
 export default function StudentAuthForm({ register = false }) {
-  const router = useRouter(); const access = useAccess();
+  const access = useStudentAccountRedirect();
   const [email, setEmail] = useState(""); const [password, setPassword] = useState("");
   const [repeat, setRepeat] = useState(""); const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState(""); const [sent, setSent] = useState(false);
-  const destination = studentDestination(access);
-  useEffect(() => { if (access.status === "authenticated" && destination) router.replace(destination); }, [access.status, destination, router]);
   async function submit(event) {
     event.preventDefault(); if (busy) return;
     if (register && password !== repeat) { setMessage("كلمتا المرور غير متطابقتين."); return; }
@@ -32,11 +27,7 @@ export default function StudentAuthForm({ register = false }) {
         else setMessage("لم تُنشأ جلسة دخول. أكّد بريدك ثم حاول مجددًا.");
         return;
       }
-      const verified = await fetchAccountAccess(result.data.session.access_token);
-      access.refresh();
-      const next = studentDestination(verified);
-      if (next) router.replace(next);
-      else router.replace("/pending-approval");
+      await access.refresh();
     } catch { setMessage("تعذر الاتصال. حاول مجددًا دون مشاركة بيانات دخولك."); }
     finally { setBusy(false); }
   }

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint --max-warnings=0",
-    "test": "node tests/published-quizzes.test.mjs && node tests/effect-responses.test.mjs && node tests/navigation.test.mjs && node tests/admin-access.test.mjs && node tests/access-store.test.mjs && node tests/disclosure.test.mjs && node tests/pending-dialog.test.mjs && node tests/student-accounts.test.mjs"
+    "test": "node tests/published-quizzes.test.mjs && node tests/effect-responses.test.mjs && node tests/navigation.test.mjs && node tests/admin-access.test.mjs && node tests/access-store.test.mjs && node tests/disclosure.test.mjs && node tests/pending-dialog.test.mjs && node tests/student-accounts.test.mjs && node tests/student-profile-routing.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
