@@ -14,8 +14,21 @@ export const adminNavigation = [
   { href: "/admin/results", label: "النتائج", icon: "trophy" },
 ];
 export function navigationForRole(role) {
-  return role === "admin" ? [...publicNavigation, ...adminNavigation] :
+  return role === "admin" ? [...adminNavigation] :
     role === "visitor" ? [...publicNavigation, { href: "/login", label: "دخول المعلم", icon: "shield" }] : [...publicNavigation];
+}
+export function canAccessAdmin(access) {
+  return access.status === "authenticated" && access.role === "admin" && access.signingOut !== true;
+}
+export function navigationGroupsForAccess(access) {
+  const administrator = canAccessAdmin(access);
+  const groups = [{ id: "sections", label: administrator ? "إدارة المنصة" : "رحلة التعلّم", links: administrator ? [...adminNavigation] : [...publicNavigation] }];
+  if (access.canSignOut) groups.push({ id: "account", label: "الحساب", links: [
+    ...(access.status === "expired" ? [{ href: "/login", label: "دخول المعلم", icon: "shield" }] : []),
+    { action: "signOut", label: "تسجيل الخروج", icon: "logout" },
+  ] });
+  else if (!["loading", "verifying"].includes(access.status)) groups.push({ id: "account", label: "المعلم", links: [{ href: "/login", label: "دخول المعلم", icon: "shield" }] });
+  return groups;
 }
 export function isCurrentDestination(href, pathname) {
   if (href.includes("#")) return false;
@@ -33,5 +46,5 @@ export function backDestination(pathname) {
 
 export function resolveNavigationRole(account, check) {
   if (!account.userId) return "visitor";
-  return check.userId === account.userId && check.revision === account.revision && check.verified === true ? "admin" : "student";
+  return check.userId === account.userId && check.revision === account.revision && check.verified === true ? "admin" : null;
 }

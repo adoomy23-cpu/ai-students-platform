@@ -5,15 +5,10 @@ import { ActionLink, Card, EmptyState, Feedback, PageSurface, StatusBadge } from
 
 import ContentImage from "../../../components/ui/ContentImage";
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { requestAdmin } from "../../../lib/admin/client";
 
 async function requestData() {
-  const { data, error } = await supabase
-      .from("challenges")
-      .select("*")
-      .eq("status", "published")
-      .order("is_featured", { ascending: false })
-      .order("sort_order", { ascending: true });
+  const { data, error } = await requestAdmin("challenges.list", {});
   return { data, error };
 }
 

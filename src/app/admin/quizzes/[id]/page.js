@@ -1,20 +1,15 @@
 "use client";
 
 import SchoolIcon from "../../../../components/brand/SchoolIcon";
-import { Button, EmptyState, PageSurface } from "../../../../components/platform/PlatformUI";
+import { Button, EmptyState, Feedback, PageSurface } from "../../../../components/platform/PlatformUI";
 
 import ContentImage from "../../../../components/ui/ContentImage";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { requestAdmin } from "../../../../lib/admin/client";
 
 async function requestQuiz(quizId) {
-  const { data, error } = await supabase.rpc(
-        "get_quiz_for_student",
-        {
-          p_quiz_id: quizId,
-        }
-      );
+  const { data, error } = await requestAdmin("quizzes.preview", { id: quizId });
   return { data, error };
 }
 
@@ -89,8 +84,7 @@ export default function QuizPage() {
   if (error) {
     return (
       <PageSurface style={styles.center} dir="rtl">
-        <h2>تعذر فتح الاختبار</h2>
-        <p>{error}</p>
+        <Feedback tone="error"><h2>تعذر فتح الاختبار</h2><p>{error}</p></Feedback>
       </PageSurface>
     );
   }

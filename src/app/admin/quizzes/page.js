@@ -6,14 +6,10 @@ import SchoolIcon from "../../../components/brand/SchoolIcon";
 import { ActionLink, Button, Card, EmptyState, Feedback, Input, PageSurface, Select, StatusBadge, Textarea } from "../../../components/platform/PlatformUI";
 
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "../../../lib/supabase";
+import { requestAdmin } from "../../../lib/admin/client";
 
 async function requestData() {
-  const { data, error } = await supabase
-      .from("quizzes")
-      .select("*")
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: false });
+  const { data, error } = await requestAdmin("quizzes.list", {});
   return { data, error };
 }
 
@@ -104,9 +100,7 @@ export default function AdminQuizzesPage() {
       sort_order: Number(form.sort_order) || 0,
     };
 
-    const { error } = await supabase
-      .from("quizzes")
-      .insert([payload]);
+    const { error } = await requestAdmin("quizzes.create", payload);
 
     if (error) {
       console.error(error);
@@ -145,10 +139,7 @@ export default function AdminQuizzesPage() {
 
     setMessage("");
 
-    const { error } = await supabase
-      .from("quizzes")
-      .delete()
-      .eq("id", id);
+    const { error } = await requestAdmin("quizzes.delete", { id });
 
     if (error) {
       console.error(error);
@@ -165,13 +156,7 @@ export default function AdminQuizzesPage() {
     const newStatus =
       quiz.status === "published" ? "draft" : "published";
 
-    const { error } = await supabase
-      .from("quizzes")
-      .update({
-        status: newStatus,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", quiz.id);
+    const { error } = await requestAdmin("quizzes.publish", { status: newStatus, updated_at: new Date().toISOString(), id: quiz.id });
 
     if (error) {
       console.error(error);

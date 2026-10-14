@@ -7,14 +7,10 @@ import { Button, Card, EmptyState, Feedback, Input, PageSurface, Select, StatusB
 
 import ContentImage from "../../../components/ui/ContentImage";
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "../../../lib/supabase";
+import { requestAdmin } from "../../../lib/admin/client";
 
 async function requestData() {
-  const { data, error } = await supabase
-      .from("learning_content")
-      .select("*")
-      .order("sort_order", { ascending: true })
-      .order("id", { ascending: false });
+  const { data, error } = await requestAdmin("content.list", {});
   return { data, error };
 }
 
@@ -83,10 +79,7 @@ export default function ContentPage() {
     setSaving(true);
     setMessage("");
 
-    const { error } = await supabase
-      .from("learning_content")
-      .insert([
-        {
+    const { error } = await requestAdmin("content.create", {
           title: form.title.trim(),
           description: form.description.trim() || null,
           content_type: form.content_type,
@@ -96,8 +89,7 @@ export default function ContentPage() {
           status: form.status,
           is_featured: form.is_featured,
           sort_order: Number(form.sort_order) || 0,
-        },
-      ]);
+        });
 
     if (error) {
       console.error(error);
@@ -132,10 +124,7 @@ export default function ContentPage() {
 
     if (!confirmed) return;
 
-    const { error } = await supabase
-      .from("learning_content")
-      .delete()
-      .eq("id", id);
+    const { error } = await requestAdmin("content.delete", { id });
 
     if (error) {
       console.error(error);

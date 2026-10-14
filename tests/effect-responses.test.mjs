@@ -36,6 +36,7 @@ async function checkLifecycle(page, scenario) {
   const context = vm.createContext({
     console: { error() {} }, Promise, Number, String, Boolean,
     supabase: { from: () => query, rpc: () => query },
+    requestAdmin: () => response,
     useParams: () => ({ id: "1" }),
     useDialogs: () => ({ notify: async () => {}, confirmAction: async () => false, requestText: async () => null }),
     useState: (initial) => [typeof initial === "function" ? initial() : initial, (value) => updates.push(value)],

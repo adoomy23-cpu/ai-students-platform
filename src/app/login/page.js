@@ -33,7 +33,7 @@ export default function LoginPage() {
     const { data: isAdmin, error: adminError } =
       await supabase.rpc("is_admin");
 
-    if (adminError || !isAdmin) {
+    if (adminError || isAdmin !== true) {
       await supabase.auth.signOut();
       setMessage("هذا الحساب غير مخوّل لدخول لوحة الإدارة.");
       setLoading(false);

@@ -386,5 +386,25 @@ export const schoolIcons = {
         "d": "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
       }
     }
+  ],
+  "logout": [
+    {
+      "tag": "path",
+      "attrs": {
+        "d": "m16 17 5-5-5-5"
+      }
+    },
+    {
+      "tag": "path",
+      "attrs": {
+        "d": "M21 12H9"
+      }
+    },
+    {
+      "tag": "path",
+      "attrs": {
+        "d": "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+      }
+    }
   ]
 };

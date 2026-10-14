@@ -5,23 +5,16 @@ import { useDialogs } from "../../../components/platform/DialogProvider";
 import { Button, Card, EmptyState, Feedback, Input, PageSurface, Select, StatusBadge } from "../../../components/platform/PlatformUI";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { requestAdmin } from "../../../lib/admin/client";
 
 async function requestData() {
   const [gradesResult, classroomsResult, studentsResult] =
       await Promise.all([
-        supabase.from("grades").select("id,name").order("id"),
+        requestAdmin("grades.list", {}),
 
-        supabase
-          .from("classrooms")
-          .select("id,grade_id,name,is_active,sort_order")
-          .order("grade_id")
-          .order("sort_order"),
+        requestAdmin("classrooms.directory", {}),
 
-        supabase
-          .from("students")
-          .select("id,classroom_id,student_name,is_active,created_at")
-          .order("student_name"),
+        requestAdmin("students.list", {}),
       ]);
   return { gradesResult, classroomsResult, studentsResult };
 }
@@ -156,7 +149,7 @@ export default function StudentsPage() {
     setSaving(true);
     setMessage("");
 
-    const { error } = await supabase.from("students").insert({
+    const { error } = await requestAdmin("students.create", {
       classroom_id: Number(classroomId),
       student_name: cleanName,
       is_active: true,
@@ -182,12 +175,7 @@ export default function StudentsPage() {
 
     if (!newName || !newName.trim()) return;
 
-    const { error } = await supabase
-      .from("students")
-      .update({
-        student_name: newName.trim(),
-      })
-      .eq("id", student.id);
+    const { error } = await requestAdmin("students.rename", { student_name: newName.trim(), id: student.id });
 
     if (error) {
       setMessage("تعذر تعديل اسم الطالب: " + error.message);
@@ -200,12 +188,7 @@ export default function StudentsPage() {
   }
 
   async function toggleStudent(student) {
-    const { error } = await supabase
-      .from("students")
-      .update({
-        is_active: !student.is_active,
-      })
-      .eq("id", student.id);
+    const { error } = await requestAdmin("students.active", { is_active: !student.is_active, id: student.id });
 
     if (error) {
       setMessage("تعذر تحديث الطالب: " + error.message);

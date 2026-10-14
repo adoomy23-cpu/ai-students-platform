@@ -2,6 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState } from "react";
 import { Button, Input } from "./PlatformUI";
 import SchoolIcon from "../brand/SchoolIcon";
+import { cancelDialogScope, settleDialog } from "../../lib/pending-dialog.mjs";
 
 const DialogContext = createContext(null);
 function DialogContent({ request, finish }) {
@@ -31,30 +32,28 @@ function DialogContent({ request, finish }) {
     </form>
   </dialog>;
 }
-export function DialogProvider({ children }) {
+export function DialogProvider({ children, scopeKey = "public" }) {
   const [request, setRequest] = useState(null);
   const pending = useRef(null);
   const sequence = useRef(0);
   const open = useCallback((kind, message, initialValue) => {
     // A second request cancels the old one rather than leaving an unresolved action.
-    pending.current?.(null);
+    pending.current?.resolve(null);
     return new Promise((resolve) => {
-      pending.current = resolve;
       sequence.current += 1;
-      setRequest({ id: sequence.current, kind, message, initialValue });
+      pending.current = { resolve, id: sequence.current, scopeKey };
+      setRequest({ id: sequence.current, kind, message, initialValue, scopeKey });
     });
-  }, []);
+  }, [scopeKey]);
   const notify = useCallback((message) => open("notice", message), [open]);
   const confirmAction = useCallback(async (message) => (await open("confirm", message)) === true, [open]);
   const requestText = useCallback((message, initialValue = "") => open("text", message, initialValue), [open]);
-  const finish = (value) => {
-    const resolve = pending.current;
-    pending.current = null;
-    setRequest(null);
-    resolve?.(value);
+  const finish = (value, id) => {
+    if (settleDialog(pending, id, scopeKey, value)) setRequest(null);
   };
-  useEffect(() => () => { pending.current?.(null); }, []);
-  return <DialogContext.Provider value={{ notify, confirmAction, requestText }}>{children}{request && <DialogContent key={request.id} request={request} finish={finish} />}</DialogContext.Provider>;
+  useEffect(() => { cancelDialogScope(pending, scopeKey); }, [scopeKey]);
+  useEffect(() => () => { pending.current?.resolve(null); }, []);
+  return <DialogContext.Provider value={{ notify, confirmAction, requestText }}>{children}{request?.scopeKey === scopeKey && <DialogContent key={request.id} request={request} finish={(value) => finish(value, request.id)} />}</DialogContext.Provider>;
 }
 export function useDialogs() {
   const context = useContext(DialogContext);

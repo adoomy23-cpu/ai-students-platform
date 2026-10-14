@@ -5,19 +5,12 @@ import { useDialogs } from "../../../components/platform/DialogProvider";
 import { Button, Card, EmptyState, Feedback, Input, PageSurface, Select, StatusBadge } from "../../../components/platform/PlatformUI";
 
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { requestAdmin } from "../../../lib/admin/client";
 
 async function requestData() {
-  const { data: gradesData, error: gradesError } = await supabase
-      .from("grades")
-      .select("id,name")
-      .order("id");
+  const { data: gradesData, error: gradesError } = await requestAdmin("grades.list", {});
 
-  const { data: classroomsData, error: classroomsError } = await supabase
-      .from("classrooms")
-      .select("id,grade_id,name,is_active,sort_order,grades(name)")
-      .order("grade_id")
-      .order("sort_order");
+  const { data: classroomsData, error: classroomsError } = await requestAdmin("classrooms.list", {});
   return { gradesData, gradesError, classroomsData, classroomsError };
 }
 
@@ -80,7 +73,7 @@ export default function ClassroomsPage() {
       (item) => Number(item.grade_id) === Number(gradeId)
     );
 
-    const { error } = await supabase.from("classrooms").insert({
+    const { error } = await requestAdmin("classrooms.create", {
       grade_id: Number(gradeId),
       name: cleanName,
       is_active: true,
@@ -100,10 +93,7 @@ export default function ClassroomsPage() {
   }
 
   async function toggleClassroom(classroom) {
-    const { error } = await supabase
-      .from("classrooms")
-      .update({ is_active: !classroom.is_active })
-      .eq("id", classroom.id);
+    const { error } = await requestAdmin("classrooms.active", { is_active: !classroom.is_active, id: classroom.id });
 
     if (error) {
       setMessage("تعذر تحديث الفصل: " + error.message);
@@ -127,10 +117,7 @@ export default function ClassroomsPage() {
       return;
     }
 
-    const { error } = await supabase
-      .from("classrooms")
-      .update({ name: newName.trim() })
-      .eq("id", classroom.id);
+    const { error } = await requestAdmin("classrooms.rename", { name: newName.trim(), id: classroom.id });
 
     if (error) {
       setMessage("تعذر تعديل اسم الفصل: " + error.message);

@@ -4,11 +4,10 @@ import SchoolIcon from "../../../components/brand/SchoolIcon";
 import { Button, Card, DataTable, EmptyState, Feedback, Input, PageSurface, StatusBadge } from "../../../components/platform/PlatformUI";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { supabase } from "../../../lib/supabase";
+import { requestAdmin } from "../../../lib/admin/client";
 
 async function requestData() {
-  const { data, error } = await supabase
-      .rpc("get_admin_quiz_results");
+  const { data, error } = await requestAdmin("results.list", {});
   return { data, error };
 }
 
