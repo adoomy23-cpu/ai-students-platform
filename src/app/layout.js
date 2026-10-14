@@ -1,8 +1,9 @@
 import "./globals.css";
+import "./home.css";
 
 export const metadata = {
   title: "منصة الذكاء الاصطناعي",
-  description: "منصة تعليمية تفاعلية للذكاء الاصطناعي",
+  description: "تعلّم وجرّب وابتكر: منصة عربية للذكاء الاصطناعي لطلاب المرحلة الابتدائية، تضم المحتوى التعليمي والاختبارات والتحديات.",
 };
 
 export default function RootLayout({ children }) {
@@ -12,3 +13,4 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
+

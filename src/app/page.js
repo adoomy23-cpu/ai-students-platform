@@ -1,133 +1,81 @@
-import { connection } from "next/server";
-import { supabase } from "../lib/supabase";
+import { createElement as h } from "react";
+import Link from "next/link";
+import { platformIdentity, learningPaths } from "../config/platform.mjs";
+import Icon from "../components/ui/Icon";
+import RobotIllustration from "../components/home/RobotIllustration";
+import PublishedQuizzes from "../components/home/PublishedQuizzes";
 
-
-;const sections = [
-  { icon: "🧠", title: "تعلّم واستكشف", text: "دروس ومعلومات ممتعة عن عالم الذكاء الاصطناعي.", badge: "ابدأ التعلّم" },
-  { icon: "🏆", title: "التحديات والمسابقات", text: "شارك بأفكارك وأعمالك وأظهر إبداعك.", badge: "شاهد التحديات" },
-  { icon: "✅", title: "الاختبارات", text: "اختبر معلوماتك بطريقة سهلة وممتعة.", badge: "ابدأ الاختبار" },
-  { icon: "🎬", title: "الفيديوهات", text: "شاهد مقاطع قصيرة تساعدك على فهم الأفكار.", badge: "شاهد الآن" },
-  { icon: "🚀", title: "أعمالي ومشاركاتي", text: "ارفع أعمالك وشارك مشاريعك المميزة.", badge: "أرسل عملك" },
-  { icon: "⭐", title: "لوحة الشرف", text: "تعرّف على نجوم المنصة وأبرز الإنجازات.", badge: "شاهد المتميزين" },
-];
-
-
-export default async function Home() {
-  await connection();
-    const { data: quizzes } = await supabase
-        .from("quizzes")
-            .select("id,title,status")
-                .eq("status", "published");
-
-  return (
-    <main dir="rtl" className="site">
-      <header className="header">
-        <div className="brand">
-          <div className="logo">AI</div>
-          <div>
-            <h1>منصة الذكاء الاصطناعي</h1>
-            <p>نتعلّم • نجرّب • نبدع</p>
-          </div>
-        </div>
-
-        <nav className="nav">
-          <a href="#home">الرئيسية</a>
-          <a href="#explore">استكشف</a>
-          <a href="#honor">لوحة الشرف</a>
-        </nav>
-      </header>
-
-      <section id="home" className="hero">
-        <div className="heroText">
-          <span className="eyebrow">✨ أهلاً وسهلاً بك</span>
-          <h2>
-            اكتشف عالم
-            <span> الذكاء الاصطناعي</span>
-          </h2>
-          <p>
-            مكانك للتعلّم والتجربة والمنافسة وصناعة أفكار مبدعة بطريقة سهلة وممتعة.
-          </p>
-
-          <div className="heroActions">
-            <a className="primaryBtn" href="#explore">ابدأ رحلتك 🚀</a>
-            <a className="secondaryBtn" href="#honor">نجوم المنصة ⭐</a>
-          </div>
-        </div>
-
-        <div className="heroVisual">
-          <div className="orbit orbitOne">💡</div>
-          <div className="orbit orbitTwo">🤖</div>
-          <div className="aiCore">AI</div>
-          <div className="orbit orbitThree">🎨</div>
-          <div className="orbit orbitFour">🧠</div>
-        </div>
-      </section>
-
-      <section className="quickStats">
-        <div><strong>6</strong><span>أقسام ممتعة</span></div>
-        <div><strong>∞</strong><span>أفكار وإبداعات</span></div>
-        <div><strong>1</strong><span>رحلة نحو المستقبل</span></div>
-      </section>
-
-      <section id="explore" className="contentSection">
-        <div className="sectionTitle">
-          <span>ماذا تريد أن تفعل اليوم؟</span>
-          <h3>اختر مغامرتك 🚀</h3>
-          <p>كل قسم يأخذك إلى تجربة جديدة في عالم الذكاء الاصطناعي.</p>
-        </div>
-
-        <div className="cards">
-          {sections.map((item) => (
-            <article className="card" key={item.title}>
-              <div className="cardIcon">{item.icon}</div>
-              <h4>{item.title}</h4>
-              <p>{item.text}</p>
-              <button>{item.title === "تعلّم واستكشف" ? (
-  <a href="/content" style={{ color: "inherit", textDecoration: "none" }}>
-    {item.badge}
-  </a>
-) : (
-  item.badge
-)} ←</button>
-            </article>
-          ))}
-        </div>
-      </section>
-      <section className="contentSection">
-          <div className="sectionTitle">
-              <span>✅ الاختبارات</span>
-                  <h3>اختباراتك المتاحة</h3>
-                      <p>اختر اختبارًا وابدأ التحدي.</p>
-                        </div>
-
-                          <div className="cards">
-                              {quizzes?.map((quiz) => (
-                                    <article className="card" key={quiz.id}>
-                                            <div className="cardIcon">📝</div>
-                                                    <h4>{quiz.title}</h4>
-                                                            <p>اختبار متاح الآن</p>
-                                                                    <a href={`/q?quiz=${quiz.id}`}><button>ابدأ الاختبار</button></a>
-                                                                          </article>
-                                                                              ))}
-                                                                                </div>
-                                                                                </section>
-
-      <section id="honor" className="highlight">
-        <div>
-          <span>⭐ لوحة الشرف</span>
-          <h3>هل ستكون نجمنا القادم؟</h3>
-          <p>
-            شارك، أبدع، وتعلّم. الأعمال المميزة ستظهر هنا ليحتفل بها الجميع.
-          </p>
-        </div>
-        <div className="trophy">🏆</div>
-      </section>
-
-      <footer>
-        <div className="footerLogo">AI</div>
-        <p>منصة تعليمية لصناعة جيل يتعلم التقنية بوعي وإبداع.</p>
-        <small>جميع الحقوق محفوظة</small>
-      </footer>
-    </main>
-  );
+function Brand() {
+  return h(Link, { href: "/", className: "ph-brand", "aria-label": "منصة الذكاء الاصطناعي، الرئيسية" },
+    h("span", { className: "ph-brand-symbol", "aria-hidden": "true" }, h(Icon, { name: "spark" })),
+    h("span", null, h("strong", null, platformIdentity.name), h("small", { lang: "en", dir: "ltr" }, platformIdentity.shortName)));
 }
+function NavLinks() {
+  return [
+    h("a", { key: "home", href: "#home", "aria-current": "page" }, "الرئيسية"),
+    h("a", { key: "explore", href: "#explore" }, "تعلّم واستكشف"),
+    h(Link, { key: "challenges", href: "/challenges" }, "التحديات"),
+    h("a", { key: "quizzes", href: "#quizzes" }, "الاختبارات"),
+    h("a", { key: "honor", href: "#honor" }, "لوحة الشرف"),
+  ];
+}
+function SectionHeading({ eyebrow, title, text, id }) {
+  return h("div", { className: "ph-section-heading" },
+    h("span", { className: "ph-eyebrow" }, eyebrow), h("h2", { id }, title), h("p", null, text));
+}
+export default function Home() {
+  return h("div", { className: "platform-home" },
+    h("a", { className: "ph-skip", href: "#main-content" }, "انتقل إلى المحتوى"),
+    h("div", { className: "ph-topline" }, h(Icon, { name: "spark" }), "مساحة للتعلّم والإبداع من الصف الأول إلى السادس"),
+    h("header", { className: "ph-header" }, h("div", { className: "ph-container ph-header-inner" },
+      h(Brand), h("nav", { className: "ph-desktop-nav", "aria-label": "التنقل الرئيسي" }, h(NavLinks)),
+      h(Link, { href: "/login", className: "ph-button ph-button-navy ph-teacher-link" }, "دخول المعلم", h(Icon, { name: "arrow" })),
+      h("details", { className: "ph-mobile-nav" },
+        h("summary", { "aria-label": "قائمة التنقل" }, h(Icon, { name: "menu" }), h("span", null, "القائمة")),
+        h("nav", { "aria-label": "التنقل على الجوال" }, h(NavLinks), h(Link, { href: "/login" }, "دخول المعلم"))))),
+    h("main", { id: "main-content" },
+      h("section", { id: "home", className: "ph-hero ph-container", "aria-labelledby": "hero-title" },
+        h("div", { className: "ph-hero-copy" },
+          h("span", { className: "ph-pill" }, h("span", { className: "ph-dot" }), "أفكار صغيرة. مستقبل كبير."),
+          h("h1", { id: "hero-title" }, "فضولك اليوم،", h("br"), h("span", null, "إبداعك غدًا.")),
+          h("p", { className: "ph-hero-description" }, "اكتشف عالم الذكاء الاصطناعي بطريقة ممتعة. تعلّم، جرّب، وتحدَّ نفسك… فكل فكرة مميزة تبدأ بسؤال!"),
+          h("div", { className: "ph-hero-actions" },
+            h("a", { href: "#explore", className: "ph-button ph-button-blue" }, "ابدأ رحلة التعلّم", h(Icon, { name: "arrow" })),
+            h(Link, { href: "/challenges", className: "ph-button ph-button-outline" }, h(Icon, { name: "rocket" }), "استكشف التحديات")),
+          h("div", { className: "ph-hero-note" }, h(Icon, { name: "shield" }), "نتعلّم التقنية بوعي، ونستخدمها بإبداع")),
+        h("div", { className: "ph-hero-art" }, h(RobotIllustration),
+          h("div", { className: "ph-float ph-float-top" }, h("span", { className: "ph-icon-tile ph-tone-orange" }, h(Icon, { name: "rocket" })), h("div", null, h("strong", null, "كل فكرة تستحق التجربة"), h("small", null, "أطلق خيالك"))),
+          h("div", { className: "ph-float ph-float-bottom" }, h("span", { className: "ph-icon-tile ph-tone-blue" }, h(Icon, { name: "spark" })), h("div", null, h("strong", null, "أنت بطل رحلتك"), h("small", null, "تعلّم بطريقتك"))))),
+      h("section", { className: "ph-values ph-container", "aria-label": "رحلتك في المنصة" },
+        ...[{ icon: "book", title: "تعلّم ببساطة", text: "دروس وأفكار قريبة من عالمك" }, { icon: "rocket", title: "جرّب بشجاعة", text: "تحديات تفتح باب الإبداع" }, { icon: "trophy", title: "احتفل بتقدّمك", text: "كل خطوة إنجاز يستحق الفخر" }].map((item) =>
+          h("div", { className: "ph-value", key: item.title }, h(Icon, { name: item.icon }), h("div", null, h("strong", null, item.title), h("span", null, item.text))))),
+      h("section", { id: "explore", className: "ph-section ph-container", "aria-labelledby": "explore-title" },
+        h(SectionHeading, { eyebrow: "عالم من الاكتشاف", title: "ماذا تريد أن تجرّب اليوم؟", text: "اختر بداية رحلتك، واترك فضولك يقودك إلى شيء جديد.", id: "explore-title" }),
+        h("div", { className: "ph-path-grid" }, ...learningPaths.map((path, index) =>
+          h("article", { className: "ph-path-card ph-path-" + path.tone, key: path.title },
+            h("div", { className: "ph-card-top" }, h("span", { className: "ph-icon-tile ph-tone-" + path.tone }, h(Icon, { name: path.icon })), h("span", { className: "ph-card-index", "aria-hidden": "true" }, "0" + (index + 1))),
+            h("h3", null, path.title), h("p", null, path.text),
+            h(Link, { href: path.href, className: "ph-text-link" }, path.label, h(Icon, { name: "arrow" }))))),
+        h("div", { className: "ph-learning-note" }, h(Icon, { name: "play" }), h("p", null, "تحب التعلّم بالمشاهدة؟ ", h(Link, { href: "/content" }, "استكشف الفيديوهات والمحتوى التعليمي")))),
+      h("section", { id: "quizzes", className: "ph-quizzes-section", "aria-labelledby": "quizzes-title" }, h("div", { className: "ph-container" },
+        h(SectionHeading, { eyebrow: "خطوة جديدة في رحلتك", title: "جاهز لتحدّي معلوماتك؟", text: "اختبارات منشورة تساعدك على اكتشاف ما تعلّمته.", id: "quizzes-title" }), h(PublishedQuizzes))),
+      h("section", { className: "ph-section ph-container ph-community", "aria-label": "أعمال الطلاب ولوحة الشرف" },
+        h("article", { id: "student-work", className: "ph-work-card" },
+          h("span", { className: "ph-eyebrow" }, "أفكار تصنع الفرق"), h("h2", null, "مساحة لإبداعك"),
+          h("p", null, "ارسم، اكتب، وابتكر. يمكنك إرسال عملك من داخل التحديات المتاحة."),
+          h(Link, { href: "/challenges", className: "ph-text-link" }, "شارك في تحدٍّ", h(Icon, { name: "arrow" })),
+          h("div", { className: "ph-work-illustration", "aria-hidden": "true" }, h(Icon, { name: "pencil" }), h(Icon, { name: "spark" }))),
+        h("article", { id: "honor", className: "ph-honor-card" },
+          h("span", { className: "ph-eyebrow" }, "نجوم المنصة"), h("h2", null, "كل إبداع يستحق التقدير"),
+          h("p", null, "مساحة مخصصة للاحتفاء بالأعمال المميزة. عرض أعمال الطلاب المعتمدة سيُتاح في مرحلة قادمة."),
+          h("span", { className: "ph-coming-soon" }, "لوحة الشرف قريبًا"), h(Icon, { name: "trophy", className: "ph-honor-trophy" }))),
+      h("section", { className: "ph-teacher-section ph-container", "aria-labelledby": "teacher-title" },
+        h("span", { className: "ph-icon-tile ph-tone-blue" }, h(Icon, { name: "book" })),
+        h("div", null, h("h2", { id: "teacher-title" }, "للمعلم… مساحة تقود فيها الإبداع"), h("p", null, "تابع محتوى المنصة والاختبارات ونتائج الطلاب من لوحة الإدارة.")),
+        h(Link, { href: "/login", className: "ph-button ph-button-navy" }, "دخول المعلم", h(Icon, { name: "arrow" })))),
+    h("footer", { className: "ph-footer" }, h("div", { className: "ph-container ph-footer-inner" },
+      h("div", null, h(Brand), h("p", null, platformIdentity.tagline)),
+      h("nav", { "aria-label": "روابط التذييل" }, h(Link, { href: "/content" }, "المحتوى التعليمي"), h(Link, { href: "/challenges" }, "التحديات"), h(Link, { href: "/login" }, "دخول المعلم")),
+      h("small", null, "منصة تعليمية لصناعة جيل يتعلّم التقنية بوعي وإبداع"))));
+}
+
