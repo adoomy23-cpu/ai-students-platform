@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import ContentImage from "../../components/ui/ContentImage";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
 export default function ContentPage() {
@@ -8,17 +10,7 @@ export default function ContentPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    loadContent();
-  }, []);
-
-  useEffect(() => {
-    loadContent();
-  }, []);
-
-  async function loadContent() {
-    setLoading(true);
-    setError("");
+  const loadContent = useCallback(async () => {
 
     const { data, error } = await supabase
       .from("learning_content")
@@ -34,9 +26,14 @@ export default function ContentPage() {
       return;
     }
 
+    setError("");
     setItems(data || []);
     setLoading(false);
-  }
+  }, []);
+
+  useEffect(() => {
+    loadContent();
+  }, [loadContent]);
 
   function typeName(type) {
     if (type === "video") return "🎬 فيديو";
@@ -50,9 +47,9 @@ export default function ContentPage() {
     <main style={styles.page} dir="rtl">
       <div style={styles.container}>
 
-        <a href="/" style={styles.back}>
+        <Link href="/" style={styles.back}>
           ← العودة للرئيسية
-        </a>
+        </Link>
 
         <section style={styles.hero}>
           <div style={styles.heroIcon}>🧠</div>
@@ -101,7 +98,7 @@ export default function ContentPage() {
             <article key={item.id} style={styles.card}>
 
               {(item.thumbnail_url || (item.content_url && (item.content_url.includes("youtube.com") || item.content_url.includes("youtu.be")))) && (
-                <img
+                <ContentImage
                   src={
                     item.thumbnail_url ||
                     `https://img.youtube.com/vi/${

@@ -1,18 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import ContentImage from "../../../components/ui/ContentImage";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function ChallengesPage() {
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadChallenges();
-  }, []);
-
-  async function loadChallenges() {
-    setLoading(true);
+  const loadChallenges = useCallback(async () => {
 
     const { data, error } = await supabase
       .from("challenges")
@@ -24,14 +21,18 @@ export default function ChallengesPage() {
     if (!error) setChallenges(data || []);
 
     setLoading(false);
-  }
+  }, []);
+
+  useEffect(() => {
+    loadChallenges();
+  }, [loadChallenges]);
 
   return (
     <main style={styles.page} dir="rtl">
       <div style={styles.container}>
-        <a href="/" style={styles.back}>
+        <Link href="/" style={styles.back}>
           ← العودة للرئيسية
-        </a>
+        </Link>
 
         <section style={styles.hero}>
           <div>
@@ -71,7 +72,7 @@ export default function ChallengesPage() {
             {challenges.map((challenge) => (
               <article key={challenge.id} style={styles.card}>
                 {challenge.cover_image_url ? (
-                  <img
+                  <ContentImage
                     src={challenge.cover_image_url}
                     alt=""
                     style={styles.image}
@@ -105,12 +106,12 @@ export default function ChallengesPage() {
                     {challenge.allow_file && <span>📎 ملف</span>}
                   </div>
 
-                  <a
+                  <Link
                     href={`/challenges/${challenge.id}`}
                     style={styles.button}
                   >
                     ابدأ التحدي 🚀
-                  </a>
+                  </Link>
                 </div>
               </article>
             ))}

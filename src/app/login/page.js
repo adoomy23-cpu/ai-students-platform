@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { supabase } from "../../lib/supabase";
 
@@ -88,9 +89,9 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <a href="/" style={styles.home}>
+        <Link href="/" style={styles.home}>
           ← العودة إلى منصة الطلاب
-        </a>
+        </Link>
       </div>
     </main>
   );

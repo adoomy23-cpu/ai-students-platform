@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -9,6 +10,7 @@ export default function ChallengeDetailsPage() {
   const challengeId = Number(params?.id);
 
   const [challenge, setChallenge] = useState(null);
+  const [loadedChallengeId, setLoadedChallengeId] = useState(null);
   const [grades, setGrades] = useState([]);
   const [classrooms, setClassrooms] = useState([]);
   const [students, setStudents] = useState([]);
@@ -26,10 +28,10 @@ export default function ChallengeDetailsPage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (!challengeId) return;
+    if (!Number.isSafeInteger(challengeId) || challengeId <= 0) return;
+    let active = true;
 
     async function loadPage() {
-      setLoading(true);
 
       const [
         challengeResult,
@@ -61,7 +63,11 @@ export default function ChallengeDetailsPage() {
           .order("student_name"),
       ]);
 
+      if (!active) return;
+      setLoadedChallengeId(challengeId);
+      setMessage("");
       if (challengeResult.error) {
+        setChallenge(null);
         setMessage("تعذر تحميل التحدي.");
       } else {
         setChallenge(challengeResult.data);
@@ -75,6 +81,7 @@ export default function ChallengeDetailsPage() {
     }
 
     loadPage();
+    return () => { active = false; };
   }, [challengeId]);
 
   const filteredClassrooms = useMemo(() => {
@@ -149,7 +156,11 @@ export default function ChallengeDetailsPage() {
     setSending(false);
   }
 
-  if (loading) {
+  if (!Number.isSafeInteger(challengeId) || challengeId <= 0) {
+    return <main dir="rtl" style={styles.center}>معرّف التحدي غير صالح.</main>;
+  }
+
+  if (loading || loadedChallengeId !== challengeId) {
     return (
       <main dir="rtl" style={styles.center}>
         جاري تحميل التحدي...
@@ -162,7 +173,7 @@ export default function ChallengeDetailsPage() {
       <main dir="rtl" style={styles.center}>
         <div>
           <h2>التحدي غير متاح</h2>
-          <a href="/challenges">العودة للتحديات</a>
+          <Link href="/challenges">العودة للتحديات</Link>
         </div>
       </main>
     );
@@ -171,9 +182,9 @@ export default function ChallengeDetailsPage() {
   return (
     <main dir="rtl" style={styles.page}>
       <div style={styles.container}>
-        <a href="/challenges" style={styles.back}>
+        <Link href="/challenges" style={styles.back}>
           ← العودة للتحديات
-        </a>
+        </Link>
 
         <section style={styles.hero}>
           <div style={styles.heroIcon}>🏆</div>

@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabase";
+import { supabase } from "./src/lib/supabase";
 ;const sections = [
   { icon: "🧠", title: "تعلّم واستكشف", text: "دروس ومعلومات ممتعة عن عالم الذكاء الاصطناعي.", badge: "ابدأ التعلّم" },
   { icon: "🏆", title: "التحديات والمسابقات", text: "شارك بأفكارك وأعمالك وأظهر إبداعك.", badge: "شاهد التحديات" },

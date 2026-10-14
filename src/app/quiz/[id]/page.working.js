@@ -1,5 +1,6 @@
 "use client";
 
+import ContentImage from "../../../components/ui/ContentImage";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -9,19 +10,25 @@ export default function QuizPage() {
   const quizId = Number(params?.id);
 
   const [quiz, setQuiz] = useState(null);
+  const [loadedQuizId, setLoadedQuizId] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!quizId) return;
+    if (!Number.isSafeInteger(quizId) || quizId <= 0) return;
+    let active = true;
 
     async function loadQuiz() {
       const { data, error } = await supabase.rpc(
         "get_quiz_for_student",
         { p_quiz_id: quizId }
       );
+
+      if (!active) return;
+      setLoadedQuizId(quizId);
+      setError("");
 
       if (error) {
         console.error(error);
@@ -36,12 +43,14 @@ export default function QuizPage() {
         return;
       }
 
+      setAnswers({});
       setQuiz(data.quiz);
       setQuestions(data.questions || []);
       setLoading(false);
     }
 
     loadQuiz();
+    return () => { active = false; };
   }, [quizId]);
 
   function chooseAnswer(questionId, optionId) {
@@ -51,7 +60,11 @@ export default function QuizPage() {
     }));
   }
 
-  if (loading) {
+  if (!Number.isSafeInteger(quizId) || quizId <= 0) {
+    return <main dir="rtl" style={styles.center}>معرّف الاختبار غير صالح.</main>;
+  }
+
+  if (loading || loadedQuizId !== quizId) {
     return (
       <main dir="rtl" style={styles.center}>
         <div style={{ fontSize: 50 }}>🤖</div>
@@ -117,7 +130,7 @@ export default function QuizPage() {
               </h2>
 
               {question.image_url && (
-                <img
+                <ContentImage
                   src={question.image_url}
                   alt=""
                   style={styles.image}

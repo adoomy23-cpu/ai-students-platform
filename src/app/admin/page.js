@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 export default function AdminPage() {
@@ -105,9 +106,9 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <a href="/" style={styles.studentButton}>
+          <Link href="/" style={styles.studentButton}>
             عرض منصة الطلاب ←
-          </a>
+          </Link>
         </section>
 
         <section style={styles.stats}>

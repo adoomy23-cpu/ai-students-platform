@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 
 export default function AdminQuizzesPage() {
@@ -23,12 +24,7 @@ export default function AdminQuizzesPage() {
     sort_order: 0,
   });
 
-  useEffect(() => {
-    loadQuizzes();
-  }, []);
-
-  async function loadQuizzes() {
-    setLoading(true);
+  const loadQuizzes = useCallback(async () => {
 
     const { data, error } = await supabase
       .from("quizzes")
@@ -44,7 +40,11 @@ export default function AdminQuizzesPage() {
     }
 
     setLoading(false);
-  }
+  }, []);
+
+  useEffect(() => {
+    loadQuizzes();
+  }, [loadQuizzes]);
 
   function updateField(name, value) {
     setForm((old) => ({
@@ -111,6 +111,7 @@ export default function AdminQuizzesPage() {
       sort_order: 0,
     });
 
+    setLoading(true);
     await loadQuizzes();
     setSaving(false);
   }
@@ -136,6 +137,7 @@ export default function AdminQuizzesPage() {
     }
 
     setMessage("✅ تم حذف الاختبار.");
+    setLoading(true);
     await loadQuizzes();
   }
 
@@ -163,15 +165,16 @@ export default function AdminQuizzesPage() {
         : "✅ تم تحويل الاختبار إلى مسودة."
     );
 
+    setLoading(true);
     await loadQuizzes();
   }
 
   return (
     <main style={styles.page} dir="rtl">
       <div style={styles.container}>
-        <a href="/admin" style={styles.back}>
+        <Link href="/admin" style={styles.back}>
           ← العودة للوحة التحكم
-        </a>
+        </Link>
 
         <section style={styles.hero}>
           <div style={styles.heroIcon}>📝</div>
@@ -480,12 +483,12 @@ export default function AdminQuizzesPage() {
                   </div>
 
                   <div style={styles.actions}>
-                    <a
+                    <Link
                       href={`/admin/quizzes/${quiz.id}`}
                       style={styles.questionsButton}
                     >
                       ✏️ إدارة الأسئلة
-                    </a>
+                    </Link>
 
                     <button
                       type="button"

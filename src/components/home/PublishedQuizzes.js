@@ -4,15 +4,13 @@ import Link from "next/link";
 import { readPublishedQuizzes } from "../../lib/published-quizzes.mjs";
 import Icon from "../ui/Icon";
 export default function PublishedQuizzes() {
-  const [state, setState] = useState({ status: "loading", quizzes: [] });
+  const configured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  const [state, setState] = useState(() => ({ status: configured ? "loading" : "unavailable", quizzes: [] }));
   const [retry, setRetry] = useState(0);
   useEffect(() => {
+    if (!configured) return;
     let active = true;
     async function load() {
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        if (active) setState({ status: "unavailable", quizzes: [] });
-        return;
-      }
       try {
         const { supabase } = await import("../../lib/supabase");
         const result = await readPublishedQuizzes(supabase);
@@ -23,7 +21,7 @@ export default function PublishedQuizzes() {
     }
     load();
     return () => { active = false; };
-  }, [retry]);
+  }, [configured, retry]);
   if (state.status === "ready") {
     return h("div", { className: "ph-quiz-grid" }, ...state.quizzes.map((quiz) =>
       h("article", { className: "ph-quiz-card", key: quiz.id },

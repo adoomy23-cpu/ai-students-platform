@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function StudentsPage() {
@@ -9,7 +10,7 @@ export default function StudentsPage() {
   const [students, setStudents] = useState([]);
 
   const [gradeId, setGradeId] = useState("");
-  const [classroomId, setClassroomId] = useState("");
+  const [classroomChoice, setClassroomId] = useState("");
   const [studentName, setStudentName] = useState("");
 
   const [filterGrade, setFilterGrade] = useState("");
@@ -20,8 +21,7 @@ export default function StudentsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  async function loadData() {
-    setLoading(true);
+  const loadData = useCallback(async () => {
 
     const [gradesResult, classroomsResult, studentsResult] =
       await Promise.all([
@@ -50,17 +50,17 @@ export default function StudentsPage() {
       setClassrooms(classroomsResult.data || []);
       setStudents(studentsResult.data || []);
 
-      if (!gradeId && gradesResult.data?.length) {
-        setGradeId(String(gradesResult.data[0].id));
+      if (gradesResult.data?.length) {
+        setGradeId((current) => current || String(gradesResult.data[0].id));
       }
     }
 
     setLoading(false);
-  }
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const availableClassrooms = useMemo(() => {
     return classrooms.filter(
@@ -70,19 +70,9 @@ export default function StudentsPage() {
     );
   }, [classrooms, gradeId]);
 
-  useEffect(() => {
-    if (
-      !availableClassrooms.some(
-        (item) => String(item.id) === String(classroomId)
-      )
-    ) {
-      setClassroomId(
-        availableClassrooms.length
-          ? String(availableClassrooms[0].id)
-          : ""
-      );
-    }
-  }, [availableClassrooms, classroomId]);
+  const classroomId = availableClassrooms.some(
+    (item) => String(item.id) === String(classroomChoice)
+  ) ? classroomChoice : String(availableClassrooms[0]?.id || "");
 
   const filteredClassrooms = useMemo(() => {
     if (!filterGrade) return classrooms;
@@ -158,6 +148,7 @@ export default function StudentsPage() {
     } else {
       setStudentName("");
       setMessage("تمت إضافة الطالب بنجاح ✅");
+      setLoading(true);
       await loadData();
     }
 
@@ -185,6 +176,7 @@ export default function StudentsPage() {
     }
 
     setMessage("تم تعديل اسم الطالب بنجاح ✅");
+    setLoading(true);
     await loadData();
   }
 
@@ -207,6 +199,7 @@ export default function StudentsPage() {
         : "تم تفعيل الطالب بنجاح ✅"
     );
 
+    setLoading(true);
     await loadData();
   }
 
@@ -238,9 +231,9 @@ export default function StudentsPage() {
             </p>
           </div>
 
-          <a href="/admin" style={styles.back}>
+          <Link href="/admin" style={styles.back}>
             العودة للوحة الإدارة
-          </a>
+          </Link>
         </div>
 
         <section style={styles.card}>

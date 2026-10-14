@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function ClassroomsPage() {
@@ -12,8 +13,7 @@ export default function ClassroomsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  async function loadData() {
-    setLoading(true);
+  const loadData = useCallback(async () => {
 
     const { data: gradesData, error: gradesError } = await supabase
       .from("grades")
@@ -32,17 +32,17 @@ export default function ClassroomsPage() {
       setGrades(gradesData || []);
       setClassrooms(classroomsData || []);
 
-      if (!gradeId && gradesData?.length) {
-        setGradeId(String(gradesData[0].id));
+      if (gradesData?.length) {
+        setGradeId((current) => current || String(gradesData[0].id));
       }
     }
 
     setLoading(false);
-  }
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   async function addClassroom(e) {
     e.preventDefault();
@@ -73,6 +73,7 @@ export default function ClassroomsPage() {
     } else {
       setName("");
       setMessage("تمت إضافة الفصل بنجاح ✅");
+      setLoading(true);
       await loadData();
     }
 
@@ -96,6 +97,7 @@ export default function ClassroomsPage() {
         : "تم تفعيل الفصل بنجاح ✅"
     );
 
+    setLoading(true);
     await loadData();
   }
 
@@ -117,6 +119,7 @@ export default function ClassroomsPage() {
     }
 
     setMessage("تم تعديل اسم الفصل بنجاح ✅");
+    setLoading(true);
     await loadData();
   }
 
@@ -131,9 +134,9 @@ export default function ClassroomsPage() {
             </p>
           </div>
 
-          <a href="/admin" style={styles.backButton}>
+          <Link href="/admin" style={styles.backButton}>
             العودة للوحة الإدارة
-          </a>
+          </Link>
         </div>
 
         <section style={styles.card}>

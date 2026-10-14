@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import ContentImage from "../../../components/ui/ContentImage";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 
 export default function ContentPage() {
@@ -21,12 +23,7 @@ export default function ContentPage() {
     sort_order: 0,
   });
 
-  useEffect(() => {
-    loadContent();
-  }, []);
-
-  async function loadContent() {
-    setLoading(true);
+  const loadContent = useCallback(async () => {
 
     const { data, error } = await supabase
       .from("learning_content")
@@ -42,7 +39,11 @@ export default function ContentPage() {
     }
 
     setLoading(false);
-  }
+  }, []);
+
+  useEffect(() => {
+    loadContent();
+  }, [loadContent]);
 
   function changeField(name, value) {
     setForm((old) => ({
@@ -99,6 +100,7 @@ export default function ContentPage() {
       sort_order: 0,
     });
 
+    setLoading(true);
     await loadContent();
     setSaving(false);
   }
@@ -122,6 +124,7 @@ export default function ContentPage() {
     }
 
     setMessage("✅ تم حذف المحتوى.");
+    setLoading(true);
     await loadContent();
   }
 
@@ -137,9 +140,9 @@ export default function ContentPage() {
   return (
     <main style={styles.page} dir="rtl">
       <div style={styles.container}>
-        <a href="/admin" style={styles.back}>
+        <Link href="/admin" style={styles.back}>
           ← العودة للوحة التحكم
-        </a>
+        </Link>
 
         <div style={styles.header}>
           <div style={styles.icon}>🧠</div>
@@ -385,7 +388,7 @@ export default function ContentPage() {
                 style={styles.item}
               >
                 {item.thumbnail_url && (
-                  <img
+                  <ContentImage
                     src={item.thumbnail_url}
                     alt={item.title}
                     style={styles.image}

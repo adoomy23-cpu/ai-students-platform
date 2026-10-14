@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 
 export default function AdminResultsPage() {
@@ -9,13 +10,7 @@ export default function AdminResultsPage() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    loadResults();
-  }, []);
-
-  async function loadResults() {
-    setLoading(true);
-    setError("");
+  const loadResults = useCallback(async () => {
 
     const { data, error } = await supabase
       .rpc("get_admin_quiz_results");
@@ -25,11 +20,16 @@ export default function AdminResultsPage() {
       setError("تعذر تحميل النتائج");
       setResults([]);
     } else {
+      setError("");
       setResults(data || []);
     }
 
     setLoading(false);
-  }
+  }, []);
+
+  useEffect(() => {
+    loadResults();
+  }, [loadResults]);
 
   const rows = useMemo(() => {
     return results.map((item) => {
@@ -95,9 +95,9 @@ export default function AdminResultsPage() {
             </p>
           </div>
 
-          <a href="/admin" style={styles.back}>
+          <Link href="/admin" style={styles.back}>
             العودة للوحة الإدارة
-          </a>
+          </Link>
         </header>
 
         {error && <div style={styles.error}>{error}</div>}
@@ -127,7 +127,7 @@ export default function AdminResultsPage() {
             style={styles.input}
           />
 
-          <button onClick={loadResults} style={styles.button}>
+          <button onClick={() => { setLoading(true); loadResults(); }} style={styles.button}>
             تحديث النتائج
           </button>
         </section>
