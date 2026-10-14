@@ -1,6 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import SchoolIcon from "../../components/brand/SchoolIcon";
+import { Button, Card, Feedback, Input, PageSurface } from "../../components/platform/PlatformUI";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { supabase } from "../../lib/supabase";
@@ -42,9 +44,9 @@ export default function LoginPage() {
   }
 
   return (
-    <main style={styles.page} dir="rtl">
-      <div style={styles.card}>
-        <div style={styles.icon}>🔐</div>
+    <PageSurface style={styles.page} dir="rtl">
+      <Card as="div" style={styles.card}>
+        <div style={styles.icon}><SchoolIcon name="shield" size={32} /></div>
 
         <p style={styles.small}>منصة الذكاء الاصطناعي</p>
 
@@ -55,9 +57,9 @@ export default function LoginPage() {
         </p>
 
         <form onSubmit={handleLogin} style={styles.form}>
-          <label style={styles.label}>البريد الإلكتروني</label>
+          <label htmlFor="field-login-1" style={styles.label}>البريد الإلكتروني</label>
 
-          <input
+          <Input autoComplete="username" id="field-login-1"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -66,9 +68,9 @@ export default function LoginPage() {
             style={styles.input}
           />
 
-          <label style={styles.label}>كلمة المرور</label>
+          <label htmlFor="field-login-2" style={styles.label}>كلمة المرور</label>
 
-          <input
+          <Input autoComplete="current-password" id="field-login-2"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -77,9 +79,9 @@ export default function LoginPage() {
             style={styles.input}
           />
 
-          {message && <p style={styles.message}>{message}</p>}
+          {message && <Feedback tone="error">{message}</Feedback>}
 
-          <button
+          <Button variant="primary" icon="check"
             type="submit"
             disabled={loading}
             style={{
@@ -88,35 +90,33 @@ export default function LoginPage() {
             }}
           >
             {loading ? "جاري الدخول..." : "تسجيل الدخول"}
-          </button>
+          </Button>
         </form>
 
-        <Link href="/" style={styles.home}>
-          ← العودة إلى منصة الطلاب
-        </Link>
-      </div>
-    </main>
+
+      </Card>
+    </PageSurface>
   );
 }
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    background: "linear-gradient(135deg,#eef8ff 0%,#f7f4ff 100%)",
+    minHeight: "360px",
+    background: "var(--gold-soft)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     padding: "20px",
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "var(--font-body)",
   },
 
   card: {
     width: "100%",
     maxWidth: "420px",
-    background: "#fff",
+    background: "var(--surface)",
     padding: "32px 24px",
     borderRadius: "24px",
-    boxShadow: "0 12px 35px rgba(0,0,0,0.08)",
+    boxShadow: "var(--shadow-sm)",
     textAlign: "center",
   },
 
@@ -125,18 +125,18 @@ const styles = {
   },
 
   small: {
-    color: "#6b7280",
+    color: "var(--muted)",
     margin: "8px 0",
   },
 
   title: {
     fontSize: "30px",
     margin: "8px 0",
-    color: "#20233a",
+    color: "var(--ink)",
   },
 
   subtitle: {
-    color: "#77798b",
+    color: "var(--muted)",
     marginBottom: "25px",
   },
 
@@ -150,13 +150,13 @@ const styles = {
   label: {
     fontSize: "14px",
     fontWeight: "bold",
-    color: "#333",
+    color: "var(--ink-soft)",
   },
 
   input: {
     padding: "14px",
     borderRadius: "12px",
-    border: "1px solid #d9d9e3",
+    border: "1px solid var(--line)",
     fontSize: "16px",
     marginBottom: "8px",
   },
@@ -166,16 +166,16 @@ const styles = {
     padding: "14px",
     border: "none",
     borderRadius: "12px",
-    background: "#5b4ae8",
-    color: "#fff",
+    background: "var(--brand-gold)",
+    color: "var(--ink)",
     fontSize: "17px",
     fontWeight: "bold",
     cursor: "pointer",
   },
 
   message: {
-    background: "#fff3f3",
-    color: "#b42318",
+    background: "var(--surface-soft)",
+    color: "var(--danger)",
     padding: "10px",
     borderRadius: "10px",
     fontSize: "14px",
@@ -184,7 +184,7 @@ const styles = {
   home: {
     display: "block",
     marginTop: "22px",
-    color: "#5b4ae8",
+    color: "var(--copper-ink)",
     textDecoration: "none",
   },
 };

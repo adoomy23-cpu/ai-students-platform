@@ -1,6 +1,6 @@
 @import "../styles/alfikr-tokens.css";
 
-.school-home { min-height:100vh; padding-bottom:80px; background:var(--canvas); color:var(--ink); font-family:var(--font-body); line-height:1.7; font-synthesis:none; }
+.school-home { min-height:100vh; padding-bottom:0; background:var(--canvas); color:var(--ink); font-family:var(--font-body); line-height:1.7; font-synthesis:none; }
 .school-home *, .school-home *::before, .school-home *::after { box-sizing:border-box; }
 .school-home h1, .school-home h2, .school-home h3, .school-home p { margin:0; }
 .school-home a { text-decoration:none; color:inherit; }
@@ -141,10 +141,6 @@
 .school-footer nav a { min-height:36px; display:flex; align-items:center; }
 .school-footer nav a:hover { color:var(--copper-ink); }
 .school-footer-bottom { display:flex; flex-direction:column; gap:5px; padding-block:14px 20px; border-top:1px solid var(--line); color:var(--muted); font-size:11px; }
-.school-mobile-dock { position:fixed; z-index:25; bottom:0; inset-inline:0; display:grid; grid-template-columns:repeat(4,1fr); background:rgb(255 253 247 / 98%); border-top:1px solid var(--line); padding:7px 10px max(7px,env(safe-area-inset-bottom)); }
-.school-mobile-dock a { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; min-height:48px; font-size:10px; color:var(--muted); border-radius:10px; }
-.school-mobile-dock a[aria-current] { background:var(--gold-soft); color:var(--ink); }
-.school-mobile-dock a:hover { background:var(--surface-soft); }
 
 @media (min-width:480px) {
   .school-logo { width:145px; }
@@ -158,7 +154,6 @@
 @media (min-width:768px) {
   .school-container { width:min(1168px,calc(100% - 64px)); }
   .school-home { padding-bottom:0; }
-  .school-mobile-dock { display:none; }
   .school-hero { padding-block:42px 32px; }
   .school-hero-copy { max-width:620px; }
   .school-hero h1 { font-size:64px; }

@@ -1,6 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import SchoolIcon from "../../components/brand/SchoolIcon";
+import { Button, Card, PageSurface } from "../../components/platform/PlatformUI";
+
 import { useState } from "react";
 
 const questions = [
@@ -61,9 +63,9 @@ export default function QuizPage() {
     score + (selected === question.correct ? 1 : 0);
 
     return (
-    <main style={styles.page}>
-    <div style={styles.card}>
-    <div style={styles.emoji}>🏆</div>
+    <PageSurface style={styles.page}>
+    <Card as="div" style={styles.card}>
+    <div style={styles.emoji}><SchoolIcon name="trophy" size={22} /></div>
     <h1 style={styles.title}>أحسنت!</h1>
 
     <p style={styles.text}>لقد أكملت الاختبار بنجاح</p>
@@ -75,24 +77,22 @@ export default function QuizPage() {
     </strong>
     </div>
 
-    <button style={styles.button} onClick={restartQuiz}>
-    🔄 أعد الاختبار
-    </button>
+    <Button variant="primary" icon="clock" style={styles.button} onClick={restartQuiz}>
+    <SchoolIcon name="clock" size={22} /> أعد الاختبار
+    </Button>
 
-    <Link href="/" style={styles.home}>
-    العودة إلى الصفحة الرئيسية
-    </Link>
-    </div>
-    </main>
+
+    </Card>
+    </PageSurface>
   );
   }
 
   return (
-  <main style={styles.page}>
+  <PageSurface style={styles.page}>
   <div style={styles.wrapper}>
-  <div style={styles.header}>
-  <span>🧠</span>
-  <h1 style={styles.headerTitle}>
+  <div className="platform-heading" style={styles.header}>
+  <span><SchoolIcon name="spark" size={22} /></span>
+  <h1 className="platform-heading" style={styles.headerTitle}>
   اختبار الذكاء الاصطناعي التجريبي
   </h1>
   <p style={styles.subtitle}>
@@ -113,12 +113,12 @@ export default function QuizPage() {
   />
   </div>
 
-  <div style={styles.card}>
+  <Card as="div" style={styles.card}>
   <h2 style={styles.question}>{question.question}</h2>
 
-  <div style={styles.options}>
+  <div className="platform-grid" style={styles.options}>
   {question.options.map((option, index) => (
-    <button
+    <Button variant="choice" aria-pressed={selected === index}
     key={index}
     onClick={() => setSelected(index)}
     style={{
@@ -129,11 +129,11 @@ export default function QuizPage() {
       }}
     >
     {option}
-    </button>
+    </Button>
   ))}
   </div>
 
-  <button
+  <Button variant="primary"
   onClick={nextQuestion}
   disabled={selected === null}
   style={{
@@ -142,27 +142,25 @@ export default function QuizPage() {
     }}
   >
   {current === questions.length - 1
-    ? "عرض النتيجة 🏆"
+    ? "عرض النتيجة"
     : "السؤال التالي ←"}
-  </button>
-  </div>
+  </Button>
+  </Card>
 
-  <Link href="/" style={styles.home}>
-  ← العودة للرئيسية
-  </Link>
+
   </div>
-  </main>
+  </PageSurface>
 );
 }
 
 const styles = {
   page: {
-    minHeight: "100vh",
+    minHeight: "360px",
     background:
-    "linear-gradient(135deg, #f7f9ff 0%, #f0fdfb 100%)",
+    "var(--gold-soft)",
     padding: "35px 18px",
     direction: "rtl",
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "var(--font-body)",
   },
 
   wrapper: {
@@ -179,23 +177,23 @@ const styles = {
   headerTitle: {
     fontSize: "28px",
     margin: "10px 0",
-    color: "#20233a",
+    color: "var(--ink)",
   },
 
   subtitle: {
     fontSize: "15px",
-    color: "#6b7280",
+    color: "var(--muted)",
   },
 
   progressText: {
     fontSize: "14px",
     marginBottom: "8px",
-    color: "#666",
+    color: "var(--muted)",
   },
 
   progress: {
     height: "9px",
-    background: "#e8e8f4",
+    background: "var(--surface-soft)",
     borderRadius: "20px",
     overflow: "hidden",
     marginBottom: "22px",
@@ -203,22 +201,22 @@ const styles = {
 
   progressBar: {
     height: "100%",
-    background: "#5b4ae8",
+    background: "var(--brand-gold)",
     borderRadius: "20px",
     transition: "0.3s",
   },
 
   card: {
-    background: "#ffffff",
+    background: "var(--surface)",
     borderRadius: "24px",
     padding: "28px 20px",
-    boxShadow: "0 10px 35px rgba(0,0,0,0.07)",
+    boxShadow: "var(--shadow-sm)",
     textAlign: "center",
   },
 
   question: {
     fontSize: "22px",
-    color: "#20233a",
+    color: "var(--ink)",
     marginBottom: "25px",
   },
 
@@ -231,19 +229,19 @@ const styles = {
   option: {
     width: "100%",
     padding: "16px",
-    border: "2px solid #ececf4",
+    border: "2px solid var(--line)",
     borderRadius: "14px",
-    background: "#fff",
+    background: "var(--surface)",
     cursor: "pointer",
     fontSize: "16px",
     textAlign: "right",
-    color: "#333",
+    color: "var(--ink-soft)",
   },
 
   selectedOption: {
-    border: "2px solid #5b4ae8",
-    background: "#f1efff",
-    color: "#4535cc",
+    border: "2px solid var(--brand-copper)",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
   },
 
   button: {
@@ -251,8 +249,8 @@ const styles = {
     border: "none",
     borderRadius: "14px",
     padding: "15px",
-    background: "#5b4ae8",
-    color: "white",
+    background: "var(--brand-gold)",
+    color: "var(--ink)",
     fontSize: "17px",
     fontWeight: "bold",
     cursor: "pointer",
@@ -262,7 +260,7 @@ const styles = {
     display: "block",
     marginTop: "22px",
     textAlign: "center",
-    color: "#5b4ae8",
+    color: "var(--copper-ink)",
     textDecoration: "none",
   },
 
@@ -272,25 +270,25 @@ const styles = {
 
   title: {
     fontSize: "32px",
-    color: "#20233a",
+    color: "var(--ink)",
   },
 
   text: {
-    color: "#6b7280",
+    color: "var(--muted)",
   },
 
   score: {
     margin: "25px 0",
     padding: "20px",
-    background: "#f5f4ff",
+    background: "var(--surface-soft)",
     borderRadius: "18px",
     fontSize: "17px",
   },
 
   scoreNumber: {
     display: "block",
-    fontSize: "38px",
-    color: "#5b4ae8",
+    fontSize: "clamp(26px, 4vw, 34px)",
+    color: "var(--copper-ink)",
     marginTop: "8px",
   },
 };

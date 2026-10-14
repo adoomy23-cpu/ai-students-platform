@@ -1,6 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { useDialogs } from "../../../components/platform/DialogProvider";
+
+import { Button, Card, EmptyState, Feedback, Input, PageSurface, Select, StatusBadge } from "../../../components/platform/PlatformUI";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -24,6 +27,7 @@ async function requestData() {
 }
 
 export default function StudentsPage() {
+  const { requestText } = useDialogs();
   const [grades, setGrades] = useState([]);
   const [classrooms, setClassrooms] = useState([]);
   const [students, setStudents] = useState([]);
@@ -162,7 +166,7 @@ export default function StudentsPage() {
       setMessage("لم تتم إضافة الطالب: " + error.message);
     } else {
       setStudentName("");
-      setMessage("تمت إضافة الطالب بنجاح ✅");
+      setMessage("تمت إضافة الطالب بنجاح");
       setLoading(true);
       await loadData();
     }
@@ -171,7 +175,7 @@ export default function StudentsPage() {
   }
 
   async function renameStudent(student) {
-    const newName = window.prompt(
+    const newName = await requestText(
       "اكتب الاسم الجديد للطالب:",
       student.student_name
     );
@@ -190,7 +194,7 @@ export default function StudentsPage() {
       return;
     }
 
-    setMessage("تم تعديل اسم الطالب بنجاح ✅");
+    setMessage("تم تعديل اسم الطالب بنجاح");
     setLoading(true);
     await loadData();
   }
@@ -211,7 +215,7 @@ export default function StudentsPage() {
     setMessage(
       student.is_active
         ? "تم تعطيل الطالب."
-        : "تم تفعيل الطالب بنجاح ✅"
+        : "تم تفعيل الطالب بنجاح"
     );
 
     setLoading(true);
@@ -236,9 +240,9 @@ export default function StudentsPage() {
   }
 
   return (
-    <main style={styles.page} dir="rtl">
+    <PageSurface style={styles.page} dir="rtl">
       <div style={styles.container}>
-        <div style={styles.header}>
+        <div className="platform-heading" style={styles.header}>
           <div>
             <h1 style={styles.title}>إدارة الطلاب</h1>
             <p style={styles.subtitle}>
@@ -246,19 +250,17 @@ export default function StudentsPage() {
             </p>
           </div>
 
-          <Link href="/admin" style={styles.back}>
-            العودة للوحة الإدارة
-          </Link>
+
         </div>
 
-        <section style={styles.card}>
+        <Card as="section" style={styles.card}>
           <h2 style={styles.cardTitle}>إضافة طالب جديد</h2>
 
           <form onSubmit={addStudent} style={styles.form}>
             <div style={styles.field}>
-              <label style={styles.label}>الصف الدراسي</label>
+              <label htmlFor="field-adminstudents-1" style={styles.label}>الصف الدراسي</label>
 
-              <select
+              <Select id="field-adminstudents-1"
                 value={gradeId}
                 onChange={(e) => {
                   setGradeId(e.target.value);
@@ -271,13 +273,13 @@ export default function StudentsPage() {
                     {grade.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             <div style={styles.field}>
-              <label style={styles.label}>الفصل</label>
+              <label htmlFor="field-adminstudents-2" style={styles.label}>الفصل</label>
 
-              <select
+              <Select id="field-adminstudents-2"
                 value={classroomId}
                 onChange={(e) =>
                   setClassroomId(e.target.value)
@@ -299,13 +301,13 @@ export default function StudentsPage() {
                     </option>
                   ))
                 )}
-              </select>
+              </Select>
             </div>
 
             <div style={styles.field}>
-              <label style={styles.label}>اسم الطالب</label>
+              <label htmlFor="field-adminstudents-3" style={styles.label}>اسم الطالب</label>
 
-              <input
+              <Input id="field-adminstudents-3"
                 value={studentName}
                 onChange={(e) =>
                   setStudentName(e.target.value)
@@ -315,7 +317,7 @@ export default function StudentsPage() {
               />
             </div>
 
-            <button
+            <Button variant="primary" icon="check"
               type="submit"
               disabled={saving || !classroomId}
               style={styles.primaryButton}
@@ -323,34 +325,34 @@ export default function StudentsPage() {
               {saving
                 ? "جارٍ الإضافة..."
                 : "＋ إضافة الطالب"}
-            </button>
+            </Button>
           </form>
 
           {message && (
-            <div style={styles.message}>{message}</div>
+            <Feedback style={styles.message}>{message}</Feedback>
           )}
-        </section>
+        </Card>
 
-        <section style={styles.card}>
-          <div style={styles.listHeader}>
+        <Card as="section" style={styles.card}>
+          <div className="platform-heading" style={styles.listHeader}>
             <h2 style={styles.cardTitle}>
               الطلاب الحاليون
             </h2>
 
-            <span style={styles.counter}>
+            <StatusBadge style={styles.counter}>
               {visibleStudents.length} طالب
-            </span>
+            </StatusBadge>
           </div>
 
-          <div style={styles.filters}>
-            <input
+          <div className="platform-columns" style={styles.filters}>
+            <Input aria-label="البحث باسم الطالب"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="🔎 البحث باسم الطالب"
+              placeholder="البحث باسم الطالب"
               style={styles.input}
             />
 
-            <select
+            <Select aria-label="الصف الدراسي"
               value={filterGrade}
               onChange={(e) => {
                 setFilterGrade(e.target.value);
@@ -365,9 +367,9 @@ export default function StudentsPage() {
                   {grade.name}
                 </option>
               ))}
-            </select>
+            </Select>
 
-            <select
+            <Select aria-label="الفصل"
               value={filterClassroom}
               onChange={(e) =>
                 setFilterClassroom(e.target.value)
@@ -384,19 +386,19 @@ export default function StudentsPage() {
                   فصل {classroom.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           {loading ? (
-            <div style={styles.empty}>
+            <EmptyState loading={true} style={styles.empty}>
               جارٍ تحميل البيانات...
-            </div>
+            </EmptyState>
           ) : visibleStudents.length === 0 ? (
-            <div style={styles.empty}>
+            <EmptyState style={styles.empty}>
               لا يوجد طلاب ضمن الاختيار الحالي.
-            </div>
+            </EmptyState>
           ) : (
-            <div style={styles.grid}>
+            <div className="platform-grid" style={styles.grid}>
               {visibleStudents.map((student) => {
                 const location = getLocation(student);
 
@@ -417,23 +419,23 @@ export default function StudentsPage() {
                       {location.classroom}
                     </div>
 
-                    <span style={styles.status}>
+                    <StatusBadge style={styles.status} tone={student.is_active ? "success" : "neutral"}>
                       {student.is_active
                         ? "نشط"
                         : "معطّل"}
-                    </span>
+                    </StatusBadge>
 
                     <div style={styles.actions}>
-                      <button
+                      <Button variant="secondary" icon="pencil"
                         onClick={() =>
                           renameStudent(student)
                         }
                         style={styles.actionButton}
                       >
                         تعديل الاسم
-                      </button>
+                      </Button>
 
-                      <button
+                      <Button variant="secondary" icon="shield"
                         onClick={() =>
                           toggleStudent(student)
                         }
@@ -442,26 +444,26 @@ export default function StudentsPage() {
                         {student.is_active
                           ? "تعطيل"
                           : "تفعيل"}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 );
               })}
             </div>
           )}
-        </section>
+        </Card>
       </div>
-    </main>
+    </PageSurface>
   );
 }
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    background: "#f6f8fc",
+    minHeight: "360px",
+    background: "var(--surface-soft)",
     padding: "32px 16px",
-    fontFamily: "Arial, sans-serif",
-    color: "#172033",
+    fontFamily: "var(--font-body)",
+    color: "var(--ink)",
   },
 
   container: {
@@ -484,14 +486,14 @@ const styles = {
   },
 
   subtitle: {
-    color: "#667085",
+    color: "var(--muted)",
   },
 
   back: {
     textDecoration: "none",
-    color: "#344054",
+    color: "var(--muted)",
     background: "white",
-    border: "1px solid #e4e7ec",
+    border: "1px solid var(--line)",
     padding: "11px 16px",
     borderRadius: "12px",
   },
@@ -501,7 +503,7 @@ const styles = {
     padding: "22px",
     borderRadius: "20px",
     marginBottom: "20px",
-    border: "1px solid #eaecf0",
+    border: "1px solid var(--line)",
   },
 
   cardTitle: {
@@ -531,7 +533,7 @@ const styles = {
     width: "100%",
     boxSizing: "border-box",
     padding: "12px",
-    border: "1px solid #d0d5dd",
+    border: "1px solid var(--line)",
     borderRadius: "12px",
     fontSize: "16px",
     background: "white",
@@ -541,8 +543,8 @@ const styles = {
     padding: "13px 20px",
     border: 0,
     borderRadius: "12px",
-    background: "#3157d5",
-    color: "white",
+    background: "var(--brand-gold)",
+    color: "var(--ink)",
     fontWeight: "800",
     cursor: "pointer",
   },
@@ -550,7 +552,7 @@ const styles = {
   message: {
     marginTop: "15px",
     padding: "12px",
-    background: "#f8fafc",
+    background: "var(--surface-soft)",
     borderRadius: "10px",
   },
 
@@ -561,7 +563,7 @@ const styles = {
   },
 
   counter: {
-    background: "#eef2ff",
+    background: "var(--surface-soft)",
     padding: "6px 11px",
     borderRadius: "20px",
     fontWeight: "700",
@@ -570,7 +572,7 @@ const styles = {
   filters: {
     display: "grid",
     gridTemplateColumns:
-      "repeat(auto-fit, minmax(190px, 1fr))",
+      "repeat(auto-fit, minmax(min(100%, 190px), 1fr))",
     gap: "12px",
     marginBottom: "20px",
   },
@@ -578,12 +580,12 @@ const styles = {
   grid: {
     display: "grid",
     gridTemplateColumns:
-      "repeat(auto-fit, minmax(230px, 1fr))",
+      "repeat(auto-fit, minmax(min(100%, 230px), 1fr))",
     gap: "14px",
   },
 
   studentCard: {
-    border: "1px solid #eaecf0",
+    border: "1px solid var(--line)",
     padding: "17px",
     borderRadius: "16px",
   },
@@ -595,15 +597,15 @@ const styles = {
 
   location: {
     marginTop: "7px",
-    color: "#667085",
+    color: "var(--muted)",
   },
 
   status: {
     display: "inline-block",
     marginTop: "12px",
     padding: "5px 10px",
-    background: "#ecfdf5",
-    color: "#047857",
+    background: "var(--surface-soft)",
+    color: "var(--success)",
     borderRadius: "20px",
     fontSize: "12px",
     fontWeight: "800",
@@ -619,7 +621,7 @@ const styles = {
     flex: 1,
     padding: "9px",
     background: "white",
-    border: "1px solid #d0d5dd",
+    border: "1px solid var(--line)",
     borderRadius: "10px",
     cursor: "pointer",
   },
@@ -627,6 +629,6 @@ const styles = {
   empty: {
     textAlign: "center",
     padding: "35px",
-    color: "#667085",
+    color: "var(--muted)",
   },
 };

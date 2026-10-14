@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { platformIdentity, learningPaths } from "../config/platform.mjs";
-import SchoolBrand from "../components/brand/SchoolBrand";
+import { learningPaths } from "../config/platform.mjs";
 import SchoolIcon from "../components/brand/SchoolIcon";
-import MobileNavigation from "../components/brand/MobileNavigation";
 import RobotIllustration from "../components/home/RobotIllustration";
+import TeacherPanel from "../components/home/TeacherPanel";
 import PublishedQuizzes from "../components/home/PublishedQuizzes";
 
 function SectionTitle({ eyebrow, title, text, id }) {
@@ -18,23 +17,7 @@ function SectionTitle({ eyebrow, title, text, id }) {
 
 export default function Home() {
   return (
-    <div className="school-home">
-      <a className="school-skip" href="#main-content">انتقل إلى المحتوى</a>
-      <header className="school-header">
-        <div className="school-container school-header-inner">
-          <SchoolBrand />
-          <nav className="school-desktop-navigation" aria-label="التنقل الرئيسي">
-            <Link href="#home" aria-current="page">الرئيسية</Link>
-            <Link href="#explore">رحلة التعلّم</Link>
-            <Link href="/challenges">التحديات</Link>
-            <Link href="#quizzes">الاختبارات</Link>
-            <Link href="#honor">لوحة الشرف</Link>
-          </nav>
-          <Link href="/login" className="school-button school-button-dark school-header-login"><SchoolIcon name="teacher" size={19} />دخول المعلم</Link>
-          <MobileNavigation />
-        </div>
-      </header>
-
+    <div className="platform-home-content">
       <main id="main-content">
         <section id="home" className="school-hero school-container" aria-labelledby="hero-title">
           <div className="school-hero-copy">
@@ -107,27 +90,10 @@ export default function Home() {
           </article>
         </section>
 
-        <section className="school-teacher-panel school-container" aria-labelledby="teacher-title">
-          <span className="school-icon-tile school-tone-stone"><SchoolIcon name="teacher" size={27} /></span>
-          <div><h2 id="teacher-title">وراء كل فكرة، معلّم يلهم.</h2><p>تابع المحتوى والاختبارات ونتائج الطلاب من لوحة الإدارة.</p></div>
-          <Link href="/login" className="school-button school-button-outline">دخول المعلم<SchoolIcon name="arrow" size={18} /></Link>
-        </section>
+        <TeacherPanel />
       </main>
 
-      <footer className="school-footer">
-        <div className="school-container school-footer-main">
-          <SchoolBrand compact />
-          <nav aria-label="روابط التذييل"><Link href="/content">المحتوى التعليمي</Link><Link href="/challenges">التحديات</Link><Link href="/login">دخول المعلم</Link></nav>
-        </div>
-        <div className="school-container school-footer-bottom"><span>{platformIdentity.schoolName}</span><span>منصة تعليمية للذكاء الاصطناعي · نتعلّم التقنية بوعي وإبداع</span></div>
-      </footer>
 
-      <nav className="school-mobile-dock" aria-label="التنقل السريع على الجوال">
-        <Link href="#home" aria-current="page"><SchoolIcon name="compass" size={21} /><span>الرئيسية</span></Link>
-        <Link href="/content"><SchoolIcon name="book" size={21} /><span>تعلّم</span></Link>
-        <Link href="/challenges"><SchoolIcon name="rocket" size={21} /><span>التحديات</span></Link>
-        <Link href="#quizzes"><SchoolIcon name="check" size={21} /><span>الاختبارات</span></Link>
-      </nav>
     </div>
   );
 }

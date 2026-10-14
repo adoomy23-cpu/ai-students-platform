@@ -1,7 +1,9 @@
 "use client";
 
+import SchoolIcon from "../../components/brand/SchoolIcon";
+import { Card, EmptyState, Feedback, PageSurface, StatusBadge } from "../../components/platform/PlatformUI";
+
 import ContentImage from "../../components/ui/ContentImage";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
@@ -47,23 +49,21 @@ export default function ContentPage() {
   }, [receiveData, handleLoadError]);
 
   function typeName(type) {
-    if (type === "video") return "🎬 فيديو";
-    if (type === "lesson") return "📘 درس";
-    if (type === "activity") return "🎯 نشاط";
-    if (type === "link") return "🔗 رابط";
-    return "🧠 محتوى";
+    if (type === "video") return "فيديو";
+    if (type === "lesson") return "درس";
+    if (type === "activity") return "نشاط";
+    if (type === "link") return "رابط";
+    return "محتوى";
   }
 
   return (
-    <main style={styles.page} dir="rtl">
+    <PageSurface style={styles.page} dir="rtl">
       <div style={styles.container}>
 
-        <Link href="/" style={styles.back}>
-          ← العودة للرئيسية
-        </Link>
 
-        <section style={styles.hero}>
-          <div style={styles.heroIcon}>🧠</div>
+
+        <section className="platform-hero" style={styles.hero}>
+          <div style={styles.heroIcon}><SchoolIcon name="spark" size={32} /></div>
 
           <div>
             <p style={styles.small}>منصة الذكاء الاصطناعي</p>
@@ -74,39 +74,39 @@ export default function ContentPage() {
           </div>
         </section>
 
-        <div style={styles.sectionHeader}>
-          <h2 style={styles.heading}>📚 استكشف المحتوى</h2>
+        <div className="platform-heading" style={styles.sectionHeader}>
+          <h2 style={styles.heading}><SchoolIcon name="book" size={22} /> استكشف المحتوى</h2>
 
           {!loading && (
-            <span style={styles.count}>
+            <StatusBadge style={styles.count}>
               {items.length} محتوى
-            </span>
+            </StatusBadge>
           )}
         </div>
 
         {loading && (
-          <div style={styles.message}>
-            ⏳ جاري تحميل المحتوى...
-          </div>
+          <Feedback style={styles.message}>
+            <SchoolIcon name="spark" size={22} /> جاري تحميل المحتوى...
+          </Feedback>
         )}
 
         {error && (
-          <div style={styles.error}>
-            ❌ {error}
-          </div>
+          <Feedback tone="error" style={styles.error}>
+            <SchoolIcon name="spark" size={22} /> {error}
+          </Feedback>
         )}
 
         {!loading && !error && items.length === 0 && (
-          <div style={styles.empty}>
-            <div style={styles.emptyIcon}>✨</div>
+          <EmptyState style={styles.empty}>
+
             <h3>لا يوجد محتوى منشور حاليًا</h3>
             <p>سيتم إضافة محتوى جديد قريبًا.</p>
-          </div>
+          </EmptyState>
         )}
 
-        <div style={styles.grid}>
+        <div className="platform-grid" style={styles.grid}>
           {items.map((item) => (
-            <article key={item.id} style={styles.card}>
+            <Card as="article" key={item.id} style={styles.card}>
 
               {(item.thumbnail_url || (item.content_url && (item.content_url.includes("youtube.com") || item.content_url.includes("youtu.be")))) && (
                 <ContentImage
@@ -124,14 +124,14 @@ export default function ContentPage() {
               )}
 
               <div style={styles.cardBody}>
-                <span style={styles.badge}>
+                <StatusBadge style={styles.badge}>
                   {typeName(item.content_type)}
-                </span>
+                </StatusBadge>
 
                 {item.is_featured && (
-                  <span style={styles.featured}>
-                    ⭐ مميز
-                  </span>
+                  <StatusBadge tone="warning" style={styles.featured}>
+                    <SchoolIcon name="spark" size={22} /> مميز
+                  </StatusBadge>
                 )}
 
                 <h3 style={styles.cardTitle}>
@@ -146,7 +146,7 @@ export default function ContentPage() {
 
                 {item.related_lesson && (
                   <p style={styles.lesson}>
-                    📖 {item.related_lesson}
+                    <SchoolIcon name="spark" size={22} /> {item.related_lesson}
                   </p>
                 )}
 
@@ -162,22 +162,22 @@ export default function ContentPage() {
                 )}
               </div>
 
-            </article>
+            </Card>
           ))}
         </div>
 
       </div>
-    </main>
+    </PageSurface>
   );
 }
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    background: "#f7f9fc",
-    fontFamily: "Arial, sans-serif",
-    color: "#172033",
-    padding: "30px 16px 60px",
+    minHeight: "360px",
+    background: "var(--surface-soft)",
+    fontFamily: "var(--font-body)",
+    color: "var(--ink)",
+    padding: "24px 16px 36px",
   },
 
   container: {
@@ -188,21 +188,21 @@ const styles = {
   back: {
     display: "inline-block",
     marginBottom: "22px",
-    color: "#315bea",
+    color: "var(--copper-ink)",
     textDecoration: "none",
     fontWeight: "bold",
   },
 
   hero: {
     background:
-      "linear-gradient(135deg, #2458e8 0%, #6c4df6 100%)",
+      "var(--gold-soft)",
     borderRadius: "24px",
     padding: "32px",
-    color: "white",
+    color: "var(--ink)",
     display: "flex",
     alignItems: "center",
     gap: "20px",
-    boxShadow: "0 12px 35px rgba(49,91,234,0.18)",
+    boxShadow: "var(--shadow-sm)",
   },
 
   heroIcon: {
@@ -240,8 +240,8 @@ const styles = {
   },
 
   count: {
-    background: "#e9efff",
-    color: "#315bea",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
     padding: "7px 13px",
     borderRadius: "20px",
     fontSize: "14px",
@@ -250,7 +250,7 @@ const styles = {
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
     gap: "20px",
   },
 
@@ -258,8 +258,8 @@ const styles = {
     background: "white",
     borderRadius: "18px",
     overflow: "hidden",
-    border: "1px solid #e7ebf3",
-    boxShadow: "0 6px 22px rgba(0,0,0,0.05)",
+    border: "1px solid var(--line)",
+    boxShadow: "var(--shadow-sm)",
   },
 
   image: {
@@ -275,8 +275,8 @@ const styles = {
 
   badge: {
     display: "inline-block",
-    background: "#eef2ff",
-    color: "#315bea",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
     padding: "6px 11px",
     borderRadius: "20px",
     fontSize: "13px",
@@ -286,8 +286,8 @@ const styles = {
 
   featured: {
     display: "inline-block",
-    background: "#fff6d8",
-    color: "#8a6200",
+    background: "var(--surface-soft)",
+    color: "var(--danger)",
     padding: "6px 11px",
     borderRadius: "20px",
     fontSize: "13px",
@@ -299,13 +299,13 @@ const styles = {
   },
 
   description: {
-    color: "#667085",
+    color: "var(--muted)",
     lineHeight: 1.8,
     margin: "0 0 12px",
   },
 
   lesson: {
-    color: "#667085",
+    color: "var(--muted)",
     fontSize: "14px",
     marginBottom: "16px",
   },
@@ -313,8 +313,8 @@ const styles = {
   openButton: {
     display: "block",
     textAlign: "center",
-    background: "linear-gradient(135deg,#315bea,#714ff6)",
-    color: "white",
+    background: "var(--gold-soft)",
+    color: "var(--ink)",
     padding: "11px",
     borderRadius: "11px",
     textDecoration: "none",
@@ -330,8 +330,8 @@ const styles = {
   },
 
   error: {
-    background: "#fff1f1",
-    color: "#a52a2a",
+    background: "var(--surface-soft)",
+    color: "var(--danger)",
     padding: "20px",
     borderRadius: "15px",
     textAlign: "center",
@@ -342,8 +342,8 @@ const styles = {
     padding: "50px 20px",
     borderRadius: "18px",
     textAlign: "center",
-    color: "#667085",
-    border: "1px dashed #ccd4e4",
+    color: "var(--muted)",
+    border: "1px dashed var(--line)",
   },
 
   emptyIcon: {

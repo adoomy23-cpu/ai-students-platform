@@ -1,7 +1,9 @@
 "use client";
 
+import SchoolIcon from "../../components/brand/SchoolIcon";
+import { ActionLink, Card, EmptyState, Feedback, PageSurface, StatusBadge } from "../../components/platform/PlatformUI";
+
 import ContentImage from "../../components/ui/ContentImage";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -45,25 +47,23 @@ export default function ChallengesPage() {
   }, [receiveData, handleLoadError]);
 
   return (
-    <main style={styles.page} dir="rtl">
+    <PageSurface style={styles.page} dir="rtl">
       <div style={styles.container}>
-        <Link href="/" style={styles.back}>
-          ← العودة للرئيسية
-        </Link>
 
-        <section style={styles.hero}>
+
+        <section className="platform-hero" style={styles.hero}>
           <div>
             <div style={styles.smallTitle}>منصة الذكاء الاصطناعي</div>
-            <h1 style={styles.title}>🏆 تحديات الذكاء الاصطناعي</h1>
+            <h1 style={styles.title}><SchoolIcon name="trophy" size={22} /> تحديات الذكاء الاصطناعي</h1>
             <p style={styles.subtitle}>
-              اختر تحديًا، أطلق إبداعك، وشاركنا أفضل أعمالك ✨
+              اختر تحديًا، أطلق إبداعك، وشاركنا أفضل أعمالك <SchoolIcon name="spark" size={22} />
             </p>
           </div>
 
-          <div style={styles.heroIcon}>🚀</div>
+          <div style={styles.heroIcon}><SchoolIcon name="rocket" size={32} /></div>
         </section>
 
-        <div style={styles.sectionHeader}>
+        <div className="platform-heading" style={styles.sectionHeader}>
           <div>
             <h2 style={styles.sectionTitle}>التحديات المتاحة</h2>
             <p style={styles.sectionText}>
@@ -77,19 +77,19 @@ export default function ChallengesPage() {
         </div>
 
         {loading ? (
-          <div style={styles.message}>جاري تحميل التحديات...</div>
+          <Feedback style={styles.message}>جاري تحميل التحديات...</Feedback>
         ) : error ? (
-          <div role="alert" style={styles.message}>{error}</div>
+          <Feedback tone="error" role="alert" style={styles.message}>{error}</Feedback>
         ) : challenges.length === 0 ? (
-          <div style={styles.empty}>
-            <div style={styles.emptyIcon}>🏆</div>
+          <EmptyState style={styles.empty}>
+
             <h3>لا توجد تحديات منشورة حاليًا</h3>
-            <p>ترقب التحديات القادمة قريبًا 🚀</p>
-          </div>
+            <p>ترقب التحديات القادمة قريبًا <SchoolIcon name="rocket" size={22} /></p>
+          </EmptyState>
         ) : (
-          <div style={styles.grid}>
+          <div className="platform-grid" style={styles.grid}>
             {challenges.map((challenge) => (
-              <article key={challenge.id} style={styles.card}>
+              <Card as="article" key={challenge.id} style={styles.card}>
                 {challenge.cover_image_url ? (
                   <ContentImage
                     src={challenge.cover_image_url}
@@ -97,18 +97,18 @@ export default function ChallengesPage() {
                     style={styles.image}
                   />
                 ) : (
-                  <div style={styles.imagePlaceholder}>💡</div>
+                  <div style={styles.imagePlaceholder}><SchoolIcon name="spark" size={22} /></div>
                 )}
 
                 <div style={styles.cardBody}>
                   <div style={styles.badges}>
                     {challenge.is_featured && (
-                      <span style={styles.featured}>⭐ تحدي مميز</span>
+                      <StatusBadge tone="warning" style={styles.featured}><SchoolIcon name="spark" size={22} /> تحدي مميز</StatusBadge>
                     )}
 
-                    <span style={styles.score}>
-                      🎯 {challenge.max_score} درجة
-                    </span>
+                    <StatusBadge style={styles.score}>
+                      <SchoolIcon name="compass" size={22} /> {challenge.max_score} درجة
+                    </StatusBadge>
                   </div>
 
                   <h3 style={styles.cardTitle}>{challenge.title}</h3>
@@ -120,34 +120,34 @@ export default function ChallengesPage() {
                   )}
 
                   <div style={styles.allowed}>
-                    {challenge.allow_text && <span>✍️ نص</span>}
-                    {challenge.allow_image && <span>🖼️ صورة</span>}
-                    {challenge.allow_file && <span>📎 ملف</span>}
+                    {challenge.allow_text && <span><SchoolIcon name="pencil" size={22} /> نص</span>}
+                    {challenge.allow_image && <span><SchoolIcon name="image" size={22} /> صورة</span>}
+                    {challenge.allow_file && <span><SchoolIcon name="paperclip" size={22} /> ملف</span>}
                   </div>
 
-                  <Link
+                  <ActionLink
                     href={`/challenges/${challenge.id}`}
                     style={styles.button}
                   >
-                    ابدأ التحدي 🚀
-                  </Link>
+                    ابدأ التحدي <SchoolIcon name="rocket" size={22} />
+                  </ActionLink>
                 </div>
-              </article>
+              </Card>
             ))}
           </div>
         )}
       </div>
-    </main>
+    </PageSurface>
   );
 }
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    background: "#f5f7ff",
+    minHeight: "360px",
+    background: "var(--surface-soft)",
     padding: "24px 14px 60px",
-    fontFamily: "Arial, sans-serif",
-    color: "#172033",
+    fontFamily: "var(--font-body)",
+    color: "var(--ink)",
   },
 
   container: {
@@ -159,24 +159,24 @@ const styles = {
     display: "inline-block",
     marginBottom: "18px",
     textDecoration: "none",
-    color: "#3159d9",
-    background: "#fff",
+    color: "var(--copper-ink)",
+    background: "var(--surface)",
     padding: "10px 16px",
     borderRadius: "12px",
-    boxShadow: "0 4px 18px rgba(0,0,0,.05)",
+    boxShadow: "var(--shadow-sm)",
   },
 
   hero: {
     background:
-      "linear-gradient(135deg, #2563eb 0%, #6d3df5 100%)",
+      "var(--gold-soft)",
     borderRadius: "24px",
     padding: "30px",
-    color: "#fff",
+    color: "var(--ink)",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     gap: "20px",
-    boxShadow: "0 12px 30px rgba(63,70,220,.18)",
+    boxShadow: "var(--shadow-sm)",
   },
 
   smallTitle: {
@@ -215,13 +215,13 @@ const styles = {
 
   sectionText: {
     margin: "5px 0 0",
-    color: "#7b8499",
+    color: "var(--muted)",
     fontSize: "14px",
   },
 
   count: {
-    background: "#e9edff",
-    color: "#4058c9",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
     padding: "8px 13px",
     borderRadius: "20px",
     fontSize: "13px",
@@ -230,16 +230,16 @@ const styles = {
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))",
+    gridTemplateColumns: "repeat(auto-fit,minmax(min(100%, 280px),1fr))",
     gap: "18px",
   },
 
   card: {
-    background: "#fff",
+    background: "var(--surface)",
     borderRadius: "20px",
     overflow: "hidden",
-    boxShadow: "0 7px 25px rgba(20,30,70,.07)",
-    border: "1px solid #edf0f8",
+    boxShadow: "var(--shadow-sm)",
+    border: "1px solid var(--line)",
   },
 
   image: {
@@ -256,7 +256,7 @@ const styles = {
     justifyContent: "center",
     fontSize: "65px",
     background:
-      "linear-gradient(135deg,#eef4ff,#f4edff)",
+      "var(--gold-soft)",
   },
 
   cardBody: {
@@ -271,16 +271,16 @@ const styles = {
   },
 
   featured: {
-    background: "#fff6d8",
-    color: "#946c00",
+    background: "var(--surface-soft)",
+    color: "var(--danger)",
     padding: "6px 9px",
     borderRadius: "9px",
     fontSize: "12px",
   },
 
   score: {
-    background: "#eef5ff",
-    color: "#3159d9",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
     padding: "6px 9px",
     borderRadius: "9px",
     fontSize: "12px",
@@ -292,7 +292,7 @@ const styles = {
   },
 
   description: {
-    color: "#687186",
+    color: "var(--muted)",
     lineHeight: 1.8,
     minHeight: "48px",
   },
@@ -301,7 +301,7 @@ const styles = {
     display: "flex",
     gap: "8px",
     flexWrap: "wrap",
-    color: "#687186",
+    color: "var(--muted)",
     fontSize: "13px",
     margin: "15px 0",
   },
@@ -311,26 +311,26 @@ const styles = {
     textAlign: "center",
     textDecoration: "none",
     background:
-      "linear-gradient(90deg,#2864ed,#7b35ee)",
-    color: "#fff",
+      "var(--gold-soft)",
+    color: "var(--ink)",
     padding: "13px",
     borderRadius: "12px",
     fontWeight: "bold",
   },
 
   message: {
-    background: "#fff",
+    background: "var(--surface)",
     padding: "35px",
     borderRadius: "18px",
     textAlign: "center",
   },
 
   empty: {
-    background: "#fff",
+    background: "var(--surface)",
     padding: "55px 20px",
     borderRadius: "20px",
     textAlign: "center",
-    color: "#687186",
+    color: "var(--muted)",
   },
 
   emptyIcon: {

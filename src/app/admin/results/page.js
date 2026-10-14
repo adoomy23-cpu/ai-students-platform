@@ -1,6 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import SchoolIcon from "../../../components/brand/SchoolIcon";
+import { Button, Card, DataTable, EmptyState, Feedback, Input, PageSurface, StatusBadge } from "../../../components/platform/PlatformUI";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 
@@ -93,31 +95,29 @@ export default function AdminResultsPage() {
 
   if (loading) {
     return (
-      <main dir="rtl" style={styles.center}>
-        جارٍ تحميل النتائج...
-      </main>
+      <PageSurface dir="rtl" style={styles.center}>
+        <EmptyState loading>جارٍ تحميل النتائج...</EmptyState>
+      </PageSurface>
     );
   }
 
   return (
-    <main dir="rtl" style={styles.page}>
+    <PageSurface dir="rtl" style={styles.page}>
       <div style={styles.container}>
-        <header style={styles.header}>
+        <header className="platform-heading" style={styles.header}>
           <div>
-            <h1 style={styles.title}>📊 نتائج الاختبارات</h1>
+            <h1 style={styles.title}><SchoolIcon name="spark" size={22} /> نتائج الاختبارات</h1>
             <p style={styles.subtitle}>
               متابعة درجات الطلاب ومحاولاتهم
             </p>
           </div>
 
-          <Link href="/admin" style={styles.back}>
-            العودة للوحة الإدارة
-          </Link>
+
         </header>
 
-        {error && <div style={styles.error}>{error}</div>}
+        {error && <Feedback tone="error" style={styles.error}>{error}</Feedback>}
 
-        <section style={styles.stats}>
+        <section className="platform-grid" style={styles.stats}>
           <div style={styles.stat}>
             <span>عدد المحاولات</span>
             <strong>{filteredRows.length}</strong>
@@ -135,80 +135,80 @@ export default function AdminResultsPage() {
         </section>
 
         <section style={styles.tools}>
-          <input
+          <Input aria-label="ابحث باسم الطالب أو الاختبار..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="🔎 ابحث باسم الطالب أو الاختبار..."
+            placeholder="ابحث باسم الطالب أو الاختبار..."
             style={styles.input}
           />
 
-          <button onClick={() => { setLoading(true); loadResults(); }} style={styles.button}>
+          <Button variant="primary" icon="clock" onClick={() => { setLoading(true); loadResults(); }} style={styles.button}>
             تحديث النتائج
-          </button>
+          </Button>
         </section>
 
-        <section style={styles.card}>
+        <Card as="section" style={styles.card}>
           {filteredRows.length === 0 ? (
-            <div style={styles.empty}>لا توجد نتائج حاليًا</div>
+            <EmptyState style={styles.empty}>لا توجد نتائج حاليًا</EmptyState>
           ) : (
             <div style={styles.tableWrap}>
-              <table style={styles.table}>
+              <DataTable style={styles.table}>
                 <thead>
                   <tr>
-                    <th style={styles.th}>الطالب</th>
-                    <th style={styles.th}>الصف</th>
-                    <th style={styles.th}>الفصل</th>
-                    <th style={styles.th}>الاختبار</th>
-                    <th style={styles.th}>الدرجة</th>
-                    <th style={styles.th}>النسبة</th>
-                    <th style={styles.th}>المحاولة</th>
-                    <th style={styles.th}>وقت التسليم</th>
+                    <th scope="col" style={styles.th}>الطالب</th>
+                    <th scope="col" style={styles.th}>الصف</th>
+                    <th scope="col" style={styles.th}>الفصل</th>
+                    <th scope="col" style={styles.th}>الاختبار</th>
+                    <th scope="col" style={styles.th}>الدرجة</th>
+                    <th scope="col" style={styles.th}>النسبة</th>
+                    <th scope="col" style={styles.th}>المحاولة</th>
+                    <th scope="col" style={styles.th}>وقت التسليم</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {filteredRows.map((row) => (
                     <tr key={row.id}>
-                      <td style={styles.td}>
+                      <td data-label="الطالب" style={styles.td}>
                         <strong>{row.student}</strong>
                       </td>
-                      <td style={styles.td}>{row.grade}</td>
-                      <td style={styles.td}>{row.classroom}</td>
-                      <td style={styles.td}>{row.quiz}</td>
-                      <td style={styles.td}>
+                      <td data-label="الصف" style={styles.td}>{row.grade}</td>
+                      <td data-label="الفصل" style={styles.td}>{row.classroom}</td>
+                      <td data-label="الاختبار" style={styles.td}>{row.quiz}</td>
+                      <td data-label="الدرجة" style={styles.td}>
                         {row.score} من {row.total}
                       </td>
-                      <td style={styles.td}>
-                        <span style={styles.badge}>
+                      <td data-label="النسبة" style={styles.td}>
+                        <StatusBadge style={styles.badge}>
                           {row.percentage}%
-                        </span>
+                        </StatusBadge>
                       </td>
-                      <td style={styles.td}>{row.attempt}</td>
-                      <td style={styles.td}>
+                      <td data-label="المحاولة" style={styles.td}>{row.attempt}</td>
+                      <td data-label="وقت التسليم" style={styles.td}>
                         {formatDate(row.submittedAt)}
                       </td>
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </DataTable>
             </div>
           )}
-        </section>
+        </Card>
       </div>
-    </main>
+    </PageSurface>
   );
 }
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    background: "#f5f8ff",
-    padding: "30px 16px 70px",
-    fontFamily: "Arial, sans-serif",
-    color: "#172033",
+    minHeight: "360px",
+    background: "var(--surface-soft)",
+    padding: "24px 16px 36px",
+    fontFamily: "var(--font-body)",
+    color: "var(--ink)",
   },
   center: {
-    minHeight: "100vh",
+    minHeight: "360px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -231,34 +231,34 @@ const styles = {
   },
   subtitle: {
     margin: "7px 0 0",
-    color: "#667085",
+    color: "var(--muted)",
   },
   back: {
-    background: "#fff",
+    background: "var(--surface)",
     padding: "11px 16px",
     borderRadius: "12px",
     textDecoration: "none",
-    color: "#172033",
-    border: "1px solid #e3e8f0",
+    color: "var(--ink)",
+    border: "1px solid var(--line)",
     fontWeight: "700",
   },
   stats: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))",
+    gridTemplateColumns: "repeat(auto-fit,minmax(min(100%, 180px),1fr))",
     gap: "14px",
     marginBottom: "16px",
   },
   stat: {
-    background: "#fff",
+    background: "var(--surface)",
     borderRadius: "18px",
     padding: "20px",
-    border: "1px solid #e7ebf3",
+    border: "1px solid var(--line)",
     display: "flex",
     flexDirection: "column",
     gap: "8px",
   },
   tools: {
-    background: "#fff",
+    background: "var(--surface)",
     borderRadius: "18px",
     padding: "14px",
     display: "flex",
@@ -270,47 +270,47 @@ const styles = {
     flex: "1 1 250px",
     padding: "13px",
     borderRadius: "12px",
-    border: "1px solid #d8deea",
+    border: "1px solid var(--line)",
     fontSize: "15px",
   },
   button: {
     border: 0,
     borderRadius: "12px",
     padding: "12px 18px",
-    background: "#2563eb",
-    color: "#fff",
+    background: "var(--brand-gold)",
+    color: "var(--ink)",
     fontWeight: "700",
     cursor: "pointer",
   },
   card: {
-    background: "#fff",
+    background: "var(--surface)",
     borderRadius: "20px",
     padding: "16px",
-    border: "1px solid #e7ebf3",
+    border: "1px solid var(--line)",
   },
   tableWrap: {
     overflowX: "auto",
   },
   table: {
     width: "100%",
-    minWidth: "900px",
+    minWidth: "0",
     borderCollapse: "collapse",
   },
   th: {
     padding: "13px 10px",
-    background: "#f8fafc",
+    background: "var(--surface-soft)",
     textAlign: "right",
-    borderBottom: "1px solid #e8ecf2",
-    whiteSpace: "nowrap",
+    borderBottom: "1px solid var(--line)",
+    whiteSpace: "normal",
   },
   td: {
     padding: "14px 10px",
-    borderBottom: "1px solid #f0f2f5",
-    whiteSpace: "nowrap",
+    borderBottom: "1px solid var(--line)",
+    whiteSpace: "normal",
   },
   badge: {
-    background: "#eef5ff",
-    color: "#2563eb",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
     borderRadius: "999px",
     padding: "6px 10px",
     fontWeight: "700",
@@ -318,11 +318,11 @@ const styles = {
   empty: {
     padding: "50px",
     textAlign: "center",
-    color: "#667085",
+    color: "var(--muted)",
   },
   error: {
-    background: "#fff1f1",
-    color: "#b42318",
+    background: "var(--surface-soft)",
+    color: "var(--danger)",
     borderRadius: "12px",
     padding: "12px",
     marginBottom: "15px",

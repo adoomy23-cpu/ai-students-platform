@@ -1,6 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import SchoolIcon from "../../components/brand/SchoolIcon";
+import { Button, PageSurface } from "../../components/platform/PlatformUI";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -9,74 +11,76 @@ export default function AdminPage() {
   const [active, setActive] = useState("الرئيسية");
 
   const sections = [
+    { icon: "users", title: "الطلاب", desc: "إدارة الطلاب وتفعيلهم وتعديل بياناتهم", href: "/admin/students" },
+    { icon: "book", title: "الصفوف والفصول", desc: "تنظيم الفصول وتفعيلها", href: "/admin/classrooms" },
     {
-      icon: "🏠",
+      icon: "compass",
       title: "الرئيسية",
       desc: "نظرة عامة على المنصة",
       href: null,
     },
     {
-      icon: "🧠",
+      icon: "book",
       title: "المحتوى",
       desc: "إضافة وإدارة الدروس والفيديوهات",
       href: "/admin/content",
     },
     {
-      icon: "✅",
+      icon: "check",
       title: "الاختبارات",
       desc: "إنشاء وإدارة الاختبارات",
-      href: null,
+      href: "/admin/quizzes",
     },
     {
-      icon: "📊",
+      icon: "trophy",
       title: "نتائج الاختبارات",
       desc: "عرض درجات الطلاب ومحاولاتهم",
       href: "/admin/results",
     },
     {
-      icon: "🏆",
+      icon: "rocket",
       title: "التحديات",
-      desc: "المسابقات والتحديات وسؤال الأسبوع",
-      href: null,
+      desc: "استعراض التحديات المنشورة",
+      href: "/admin/challenges",
     },
     {
-      icon: "📤",
+      icon: "pencil",
       title: "أعمال الطلاب",
       desc: "مراجعة المشاركات والأعمال المرسلة",
       href: null,
     },
     {
-      icon: "⭐",
+      icon: "trophy",
       title: "لوحة الشرف",
       desc: "عرض الطلاب والأعمال المتميزة",
       href: null,
     },
     {
-      icon: "📢",
+      icon: "spark",
       title: "الإعلانات",
       desc: "نشر الأخبار والتنبيهات للطلاب",
       href: null,
     },
     {
-      icon: "🏅",
+      icon: "shield",
       title: "الشارات والإنجازات",
       desc: "تحفيز الطلاب بالشارات والإنجازات",
       href: null,
     },
     {
-      icon: "📊",
+      icon: "compass",
       title: "الإحصائيات",
       desc: "متابعة الزيارات والتفاعل والمشاهدات",
       href: null,
     },
     {
-      icon: "🎨",
+      icon: "pencil",
       title: "هوية المنصة",
       desc: "الشعار والألوان والعبارات الترحيبية",
       href: null,
     },
     {
-      icon: "⚙️",
+      icon: "shield",
       title: "الإعدادات",
       desc: "إدارة الإعدادات العامة للمنصة",
       href: null,
@@ -93,14 +97,14 @@ export default function AdminPage() {
   }
 
   return (
-    <main style={styles.page} dir="rtl">
+    <PageSurface style={styles.page} dir="rtl">
       <div style={styles.container}>
-        <section style={styles.hero}>
+        <section className="platform-hero" style={styles.hero}>
           <div>
             <p style={styles.heroSmall}>منصة الذكاء الاصطناعي</p>
 
             <h1 style={styles.heroTitle}>
-              👨‍🏫 لوحة تحكم المعلم
+              <SchoolIcon name="teacher" size={22} /> لوحة تحكم المعلم
             </h1>
 
             <p style={styles.heroText}>
@@ -108,39 +112,37 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <Link href="/" style={styles.studentButton}>
-            عرض منصة الطلاب ←
-          </Link>
+
         </section>
 
-        <section style={styles.stats}>
+        <section className="platform-grid" style={styles.stats}>
           <div style={styles.statCard}>
-            <strong style={styles.statNumber}>11</strong>
-            <span style={styles.statLabel}>أقسام الإدارة</span>
+            <strong style={styles.statNumber}>{sections.filter((section) => section.href).length}</strong>
+            <span style={styles.statLabel}>أقسام مرتبطة</span>
           </div>
 
           <div style={styles.statCard}>
-            <strong style={styles.statNumber}>1</strong>
-            <span style={styles.statLabel}>اختبار متاح</span>
+            <strong style={styles.statNumber}><SchoolIcon name="check" size={28} /></strong>
+            <span style={styles.statLabel}>اختبارات ومحتوى</span>
           </div>
 
           <div style={styles.statCard}>
-            <strong style={styles.statNumber}>0</strong>
-            <span style={styles.statLabel}>مشاركات جديدة</span>
+            <strong style={styles.statNumber}><SchoolIcon name="teacher" size={28} /></strong>
+            <span style={styles.statLabel}>طلاب وفصول</span>
           </div>
         </section>
 
         <section style={styles.sectionIntro}>
-          <p style={styles.quick}>⚡ الإدارة السريعة</p>
+          <p style={styles.quick}><SchoolIcon name="spark" size={22} /> الإدارة السريعة</p>
           <h2 style={styles.heading}>ماذا تريد أن تدير اليوم؟</h2>
           <p style={styles.subheading}>
             اختر القسم الذي تريد العمل عليه
           </p>
         </section>
 
-        <section style={styles.grid}>
+        <section className="platform-grid" style={styles.grid}>
           {sections.map((section) => (
-            <button
+            <Button variant="card"
               key={section.title}
               type="button"
               onClick={() => handleSection(section)}
@@ -152,7 +154,7 @@ export default function AdminPage() {
               }}
             >
               <div style={styles.cardIcon}>
-                {section.icon}
+                <SchoolIcon name={section.icon} size={25} />
               </div>
 
               <div style={styles.cardContent}>
@@ -163,15 +165,16 @@ export default function AdminPage() {
                 <p style={styles.cardDesc}>
                   {section.desc}
                 </p>
+                {!section.href && section.title !== "الرئيسية" && <span className="ui-badge ui-badge-neutral">قريبًا</span>}
               </div>
 
               <div style={styles.arrow}>←</div>
-            </button>
+            </Button>
           ))}
         </section>
 
         <section style={styles.selectedBox}>
-          <div style={styles.selectedIcon}>✨</div>
+          <div style={styles.selectedIcon}><SchoolIcon name="spark" size={22} /></div>
 
           <div>
             <p style={styles.selectedSmall}>
@@ -192,21 +195,19 @@ export default function AdminPage() {
           </div>
         </section>
 
-        <footer style={styles.footer}>
-          منصة الذكاء الاصطناعي التعليمية • لوحة المعلم
-        </footer>
+
       </div>
-    </main>
+    </PageSurface>
   );
 }
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    background: "#f5f7fb",
-    padding: "30px 16px 60px",
-    color: "#172033",
-    fontFamily: "Arial, sans-serif",
+    minHeight: "360px",
+    background: "var(--surface-soft)",
+    padding: "24px 16px 36px",
+    color: "var(--ink)",
+    fontFamily: "var(--font-body)",
   },
 
   container: {
@@ -217,17 +218,17 @@ const styles = {
 
   hero: {
     background:
-      "linear-gradient(135deg,#2458e8 0%,#684bf2 100%)",
+      "var(--gold-soft)",
     borderRadius: "24px",
     padding: "30px",
-    color: "#fff",
+    color: "var(--ink)",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     gap: "20px",
     flexWrap: "wrap",
     boxShadow:
-      "0 14px 35px rgba(49,91,234,0.18)",
+      "var(--shadow-sm)",
   },
 
   heroSmall: {
@@ -238,7 +239,7 @@ const styles = {
 
   heroTitle: {
     margin: 0,
-    fontSize: "34px",
+    fontSize: "clamp(26px, 4vw, 34px)",
   },
 
   heroText: {
@@ -248,41 +249,41 @@ const styles = {
   },
 
   studentButton: {
-    background: "#fff",
-    color: "#315bea",
+    background: "var(--surface)",
+    color: "var(--copper-ink)",
     textDecoration: "none",
     padding: "13px 20px",
     borderRadius: "13px",
     fontWeight: "bold",
-    boxShadow: "0 5px 18px rgba(0,0,0,.08)",
+    boxShadow: "var(--shadow-sm)",
   },
 
   stats: {
     display: "grid",
     gridTemplateColumns:
-      "repeat(auto-fit,minmax(180px,1fr))",
+      "repeat(auto-fit,minmax(min(100%, 180px),1fr))",
     gap: "16px",
     marginTop: "22px",
   },
 
   statCard: {
-    background: "#fff",
-    border: "1px solid #e8ebf1",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
     borderRadius: "17px",
     padding: "20px",
     textAlign: "center",
-    boxShadow: "0 4px 16px rgba(0,0,0,.03)",
+    boxShadow: "var(--shadow-sm)",
   },
 
   statNumber: {
     display: "block",
     fontSize: "28px",
-    color: "#315bea",
+    color: "var(--copper-ink)",
     marginBottom: "7px",
   },
 
   statLabel: {
-    color: "#667085",
+    color: "var(--muted)",
     fontSize: "14px",
   },
 
@@ -292,7 +293,7 @@ const styles = {
   },
 
   quick: {
-    color: "#168f83",
+    color: "var(--copper-ink)",
     margin: 0,
     fontWeight: "bold",
     fontSize: "14px",
@@ -305,20 +306,20 @@ const styles = {
 
   subheading: {
     margin: 0,
-    color: "#667085",
+    color: "var(--muted)",
   },
 
   grid: {
     display: "grid",
     gridTemplateColumns:
-      "repeat(auto-fit,minmax(260px,1fr))",
+      "repeat(auto-fit,minmax(min(100%, 260px),1fr))",
     gap: "17px",
   },
 
   card: {
     width: "100%",
-    border: "1px solid #e7eaf0",
-    background: "#fff",
+    border: "1px solid var(--line)",
+    background: "var(--surface)",
     borderRadius: "18px",
     padding: "20px",
     display: "flex",
@@ -326,13 +327,13 @@ const styles = {
     gap: "15px",
     textAlign: "right",
     cursor: "pointer",
-    boxShadow: "0 5px 20px rgba(0,0,0,.035)",
-    color: "#172033",
+    boxShadow: "var(--shadow-sm)",
+    color: "var(--ink)",
   },
 
   activeCard: {
-    border: "2px solid #315bea",
-    boxShadow: "0 7px 25px rgba(49,91,234,.12)",
+    border: "2px solid var(--brand-copper)",
+    boxShadow: "var(--shadow-sm)",
   },
 
   cardIcon: {
@@ -340,7 +341,7 @@ const styles = {
     height: "50px",
     minWidth: "50px",
     borderRadius: "14px",
-    background: "#f3f5ff",
+    background: "var(--surface-soft)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -358,21 +359,21 @@ const styles = {
 
   cardDesc: {
     margin: 0,
-    color: "#667085",
+    color: "var(--muted)",
     lineHeight: 1.7,
     fontSize: "13px",
   },
 
   arrow: {
-    color: "#315bea",
+    color: "var(--copper-ink)",
     fontSize: "20px",
   },
 
   selectedBox: {
     marginTop: "30px",
     background:
-      "linear-gradient(135deg,#f0f4ff,#faf8ff)",
-    border: "1px solid #e2e7ff",
+      "var(--gold-soft)",
+    border: "1px solid var(--line)",
     borderRadius: "20px",
     padding: "24px",
     display: "flex",
@@ -384,7 +385,7 @@ const styles = {
     width: "55px",
     height: "55px",
     borderRadius: "16px",
-    background: "#fff",
+    background: "var(--surface)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -393,7 +394,7 @@ const styles = {
 
   selectedSmall: {
     margin: 0,
-    color: "#667085",
+    color: "var(--muted)",
     fontSize: "13px",
   },
 
@@ -404,13 +405,13 @@ const styles = {
 
   selectedText: {
     margin: 0,
-    color: "#667085",
+    color: "var(--muted)",
     lineHeight: 1.8,
   },
 
   footer: {
     textAlign: "center",
-    color: "#98a2b3",
+    color: "var(--muted)",
     marginTop: "45px",
     fontSize: "13px",
   },

@@ -1,6 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import { useDialogs } from "../../../components/platform/DialogProvider";
+
+import SchoolIcon from "../../../components/brand/SchoolIcon";
+import { ActionLink, Button, Card, EmptyState, Feedback, Input, PageSurface, Select, StatusBadge, Textarea } from "../../../components/platform/PlatformUI";
+
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 
@@ -14,6 +18,7 @@ async function requestData() {
 }
 
 export default function AdminQuizzesPage() {
+  const { confirmAction } = useDialogs();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -36,7 +41,7 @@ export default function AdminQuizzesPage() {
   const receiveData = useCallback(({ data, error }) => {
     if (error) {
       console.error(error);
-      setMessage("❌ تعذر تحميل الاختبارات: " + error.message);
+      setMessage("تعذر تحميل الاختبارات:" + error.message);
     } else {
       setQuizzes(data || []);
     }
@@ -72,7 +77,7 @@ export default function AdminQuizzesPage() {
     e.preventDefault();
 
     if (!form.title.trim()) {
-      setMessage("❌ اكتب عنوان الاختبار.");
+      setMessage("اكتب عنوان الاختبار.");
       return;
     }
 
@@ -105,12 +110,12 @@ export default function AdminQuizzesPage() {
 
     if (error) {
       console.error(error);
-      setMessage("❌ لم يتم حفظ الاختبار: " + error.message);
+      setMessage("لم يتم حفظ الاختبار:" + error.message);
       setSaving(false);
       return;
     }
 
-    setMessage("✅ تم إنشاء الاختبار بنجاح.");
+    setMessage("تم إنشاء الاختبار بنجاح.");
 
     setForm({
       title: "",
@@ -132,7 +137,7 @@ export default function AdminQuizzesPage() {
   }
 
   async function deleteQuiz(id) {
-    const ok = window.confirm(
+    const ok = await confirmAction(
       "هل أنت متأكد من حذف هذا الاختبار؟"
     );
 
@@ -147,11 +152,11 @@ export default function AdminQuizzesPage() {
 
     if (error) {
       console.error(error);
-      setMessage("❌ تعذر حذف الاختبار: " + error.message);
+      setMessage("تعذر حذف الاختبار:" + error.message);
       return;
     }
 
-    setMessage("✅ تم حذف الاختبار.");
+    setMessage("تم حذف الاختبار.");
     setLoading(true);
     await loadQuizzes();
   }
@@ -170,14 +175,14 @@ export default function AdminQuizzesPage() {
 
     if (error) {
       console.error(error);
-      setMessage("❌ تعذر تغيير حالة الاختبار: " + error.message);
+      setMessage("تعذر تغيير حالة الاختبار:" + error.message);
       return;
     }
 
     setMessage(
       newStatus === "published"
-        ? "✅ تم نشر الاختبار."
-        : "✅ تم تحويل الاختبار إلى مسودة."
+        ? "تم نشر الاختبار."
+        : "تم تحويل الاختبار إلى مسودة."
     );
 
     setLoading(true);
@@ -185,14 +190,12 @@ export default function AdminQuizzesPage() {
   }
 
   return (
-    <main style={styles.page} dir="rtl">
+    <PageSurface style={styles.page} dir="rtl">
       <div style={styles.container}>
-        <Link href="/admin" style={styles.back}>
-          ← العودة للوحة التحكم
-        </Link>
 
-        <section style={styles.hero}>
-          <div style={styles.heroIcon}>📝</div>
+
+        <section className="platform-hero" style={styles.hero}>
+          <div style={styles.heroIcon}><SchoolIcon name="spark" size={32} /></div>
 
           <div>
             <p style={styles.heroSmall}>
@@ -210,10 +213,10 @@ export default function AdminQuizzesPage() {
         </section>
 
         <section style={styles.panel}>
-          <div style={styles.sectionHeader}>
+          <div className="platform-heading" style={styles.sectionHeader}>
             <div>
               <h2 style={styles.sectionTitle}>
-                ➕ إنشاء اختبار جديد
+                <SchoolIcon name="pencil" size={22} /> إنشاء اختبار جديد
               </h2>
 
               <p style={styles.sectionText}>
@@ -223,13 +226,13 @@ export default function AdminQuizzesPage() {
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div style={styles.grid}>
+            <div className="platform-grid" style={styles.grid}>
               <div style={styles.field}>
-                <label style={styles.label}>
+                <label htmlFor="field-adminquizzes-1" style={styles.label}>
                   عنوان الاختبار *
                 </label>
 
-                <input
+                <Input id="field-adminquizzes-1"
                   style={styles.input}
                   value={form.title}
                   onChange={(e) =>
@@ -240,29 +243,29 @@ export default function AdminQuizzesPage() {
               </div>
 
               <div style={styles.field}>
-                <label style={styles.label}>
+                <label htmlFor="field-adminquizzes-2" style={styles.label}>
                   حالة الاختبار
                 </label>
 
-                <select
+                <Select id="field-adminquizzes-2"
                   style={styles.input}
                   value={form.status}
                   onChange={(e) =>
                     updateField("status", e.target.value)
                   }
                 >
-                  <option value="draft">📝 مسودة</option>
-                  <option value="published">✅ منشور</option>
-                </select>
+                  <option value="draft"> مسودة</option>
+                  <option value="published"> منشور</option>
+                </Select>
               </div>
             </div>
 
             <div style={styles.field}>
-              <label style={styles.label}>
+              <label htmlFor="field-adminquizzes-3" style={styles.label}>
                 وصف الاختبار
               </label>
 
-              <textarea
+              <Textarea id="field-adminquizzes-3"
                 style={styles.textarea}
                 value={form.description}
                 onChange={(e) =>
@@ -274,11 +277,11 @@ export default function AdminQuizzesPage() {
 
             <div style={styles.threeGrid}>
               <div style={styles.field}>
-                <label style={styles.label}>
+                <label htmlFor="field-adminquizzes-4" style={styles.label}>
                   مدة الاختبار بالدقائق
                 </label>
 
-                <input
+                <Input id="field-adminquizzes-4"
                   type="number"
                   min="1"
                   style={styles.input}
@@ -294,11 +297,11 @@ export default function AdminQuizzesPage() {
               </div>
 
               <div style={styles.field}>
-                <label style={styles.label}>
+                <label htmlFor="field-adminquizzes-5" style={styles.label}>
                   عدد المحاولات
                 </label>
 
-                <input
+                <Input id="field-adminquizzes-5"
                   type="number"
                   min="1"
                   style={styles.input}
@@ -313,11 +316,11 @@ export default function AdminQuizzesPage() {
               </div>
 
               <div style={styles.field}>
-                <label style={styles.label}>
+                <label htmlFor="field-adminquizzes-6" style={styles.label}>
                   ترتيب الظهور
                 </label>
 
-                <input
+                <Input id="field-adminquizzes-6"
                   type="number"
                   style={styles.input}
                   value={form.sort_order}
@@ -331,13 +334,13 @@ export default function AdminQuizzesPage() {
               </div>
             </div>
 
-            <div style={styles.grid}>
+            <div className="platform-grid" style={styles.grid}>
               <div style={styles.field}>
-                <label style={styles.label}>
+                <label htmlFor="field-adminquizzes-7" style={styles.label}>
                   بداية الاختبار
                 </label>
 
-                <input
+                <Input id="field-adminquizzes-7"
                   type="datetime-local"
                   style={styles.input}
                   value={form.start_at}
@@ -348,11 +351,11 @@ export default function AdminQuizzesPage() {
               </div>
 
               <div style={styles.field}>
-                <label style={styles.label}>
+                <label htmlFor="field-adminquizzes-8" style={styles.label}>
                   نهاية الاختبار
                 </label>
 
-                <input
+                <Input id="field-adminquizzes-8"
                   type="datetime-local"
                   style={styles.input}
                   value={form.end_at}
@@ -363,9 +366,9 @@ export default function AdminQuizzesPage() {
               </div>
             </div>
 
-            <div style={styles.optionsBox}>
+            <div className="platform-grid" style={styles.optionsBox}>
               <label style={styles.checkLabel}>
-                <input
+                <Input
                   type="checkbox"
                   checked={form.show_score}
                   onChange={(e) =>
@@ -379,7 +382,7 @@ export default function AdminQuizzesPage() {
               </label>
 
               <label style={styles.checkLabel}>
-                <input
+                <Input
                   type="checkbox"
                   checked={form.show_correct_answers}
                   onChange={(e) =>
@@ -393,7 +396,7 @@ export default function AdminQuizzesPage() {
               </label>
 
               <label style={styles.checkLabel}>
-                <input
+                <Input
                   type="checkbox"
                   checked={form.is_featured}
                   onChange={(e) =>
@@ -403,17 +406,17 @@ export default function AdminQuizzesPage() {
                     )
                   }
                 />
-                ⭐ اختبار مميز
+                <SchoolIcon name="spark" size={22} /> اختبار مميز
               </label>
             </div>
 
             {message && (
-              <div style={styles.message}>
+              <Feedback style={styles.message}>
                 {message}
-              </div>
+              </Feedback>
             )}
 
-            <button
+            <Button variant="primary" icon="check"
               type="submit"
               disabled={saving}
               style={{
@@ -423,34 +426,34 @@ export default function AdminQuizzesPage() {
             >
               {saving
                 ? "جاري الحفظ..."
-                : "💾 إنشاء الاختبار"}
-            </button>
+                : "إنشاء الاختبار"}
+            </Button>
           </form>
         </section>
 
         <section style={styles.listSection}>
-          <div style={styles.listHeader}>
+          <div className="platform-heading" style={styles.listHeader}>
             <h2 style={styles.sectionTitle}>
-              📚 الاختبارات الحالية
+              <SchoolIcon name="book" size={22} /> الاختبارات الحالية
             </h2>
 
-            <span style={styles.counter}>
+            <StatusBadge style={styles.counter}>
               {quizzes.length} اختبار
-            </span>
+            </StatusBadge>
           </div>
 
           {loading ? (
-            <div style={styles.empty}>
+            <EmptyState loading={true} style={styles.empty}>
               جاري تحميل الاختبارات...
-            </div>
+            </EmptyState>
           ) : quizzes.length === 0 ? (
-            <div style={styles.empty}>
+            <EmptyState style={styles.empty}>
               لا توجد اختبارات حتى الآن.
-            </div>
+            </EmptyState>
           ) : (
             <div style={styles.cards}>
               {quizzes.map((quiz) => (
-                <article
+                <Card as="article"
                   key={quiz.id}
                   style={styles.card}
                 >
@@ -463,14 +466,14 @@ export default function AdminQuizzesPage() {
                       }
                     >
                       {quiz.status === "published"
-                        ? "✅ منشور"
-                        : "📝 مسودة"}
+                        ? "منشور"
+                        : "مسودة"}
                     </span>
 
                     {quiz.is_featured && (
-                      <span style={styles.featured}>
-                        ⭐ مميز
-                      </span>
+                      <StatusBadge tone="warning" style={styles.featured}>
+                        <SchoolIcon name="spark" size={22} /> مميز
+                      </StatusBadge>
                     )}
                   </div>
 
@@ -486,26 +489,26 @@ export default function AdminQuizzesPage() {
 
                   <div style={styles.info}>
                     <span>
-                      ⏱️{" "}
+                      <SchoolIcon name="clock" size={22} />{" "}
                       {quiz.time_limit_minutes
                         ? `${quiz.time_limit_minutes} دقيقة`
                         : "بدون وقت"}
                     </span>
 
                     <span>
-                      🔁 {quiz.max_attempts || 1} محاولة
+                      <SchoolIcon name="spark" size={22} /> {quiz.max_attempts || 1} محاولة
                     </span>
                   </div>
 
                   <div style={styles.actions}>
-                    <Link
+                    <ActionLink className="platform-grid"
                       href={`/admin/quizzes/${quiz.id}`}
                       style={styles.questionsButton}
                     >
-                      ✏️ إدارة الأسئلة
-                    </Link>
+                      <SchoolIcon name="spark" size={22} /> إدارة الأسئلة
+                    </ActionLink>
 
-                    <button
+                    <Button variant="primary" icon="shield"
                       type="button"
                       onClick={() => togglePublish(quiz)}
                       style={styles.statusButton}
@@ -513,32 +516,32 @@ export default function AdminQuizzesPage() {
                       {quiz.status === "published"
                         ? "إلغاء النشر"
                         : "نشر الاختبار"}
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button variant="danger" icon="trash"
                       type="button"
                       onClick={() => deleteQuiz(quiz.id)}
                       style={styles.deleteButton}
                     >
-                      🗑️ حذف
-                    </button>
+                      حذف
+                    </Button>
                   </div>
-                </article>
+                </Card>
               ))}
             </div>
           )}
         </section>
       </div>
-    </main>
+    </PageSurface>
   );
 }
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    background: "#f6f8fc",
-    color: "#172033",
-    fontFamily: "Arial, sans-serif",
+    minHeight: "360px",
+    background: "var(--surface-soft)",
+    color: "var(--ink)",
+    fontFamily: "var(--font-body)",
     padding: "28px 14px 70px",
   },
 
@@ -550,7 +553,7 @@ const styles = {
   back: {
     display: "inline-block",
     marginBottom: "18px",
-    color: "#2563eb",
+    color: "var(--copper-ink)",
     textDecoration: "none",
     fontWeight: "bold",
     fontSize: "14px",
@@ -558,15 +561,15 @@ const styles = {
 
   hero: {
     background:
-      "linear-gradient(135deg,#2563eb,#7c3aed)",
+      "var(--gold-soft)",
     borderRadius: "24px",
     padding: "28px",
-    color: "white",
+    color: "var(--ink)",
     display: "flex",
     alignItems: "center",
     gap: "18px",
     marginBottom: "22px",
-    boxShadow: "0 12px 35px rgba(37,99,235,.18)",
+    boxShadow: "var(--shadow-sm)",
   },
 
   heroIcon: {
@@ -577,7 +580,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "34px",
+    fontSize: "clamp(26px, 4vw, 34px)",
     flexShrink: 0,
   },
 
@@ -600,10 +603,10 @@ const styles = {
 
   panel: {
     background: "white",
-    border: "1px solid #e7ebf3",
+    border: "1px solid var(--line)",
     borderRadius: "22px",
     padding: "24px",
-    boxShadow: "0 8px 28px rgba(15,23,42,.05)",
+    boxShadow: "var(--shadow-sm)",
   },
 
   sectionHeader: {
@@ -617,14 +620,14 @@ const styles = {
 
   sectionText: {
     margin: "6px 0 0",
-    color: "#7b8496",
+    color: "var(--muted)",
     fontSize: "13px",
   },
 
   grid: {
     display: "grid",
     gridTemplateColumns:
-      "repeat(auto-fit,minmax(250px,1fr))",
+      "repeat(auto-fit,minmax(min(100%, 250px),1fr))",
     gap: "16px",
     marginBottom: "16px",
   },
@@ -632,7 +635,7 @@ const styles = {
   threeGrid: {
     display: "grid",
     gridTemplateColumns:
-      "repeat(auto-fit,minmax(190px,1fr))",
+      "repeat(auto-fit,minmax(min(100%, 190px),1fr))",
     gap: "16px",
     marginBottom: "16px",
   },
@@ -652,11 +655,10 @@ const styles = {
   input: {
     width: "100%",
     boxSizing: "border-box",
-    border: "1px solid #dce2ec",
+    border: "1px solid var(--line)",
     borderRadius: "11px",
     padding: "12px",
     background: "white",
-    outline: "none",
     fontSize: "14px",
   },
 
@@ -665,10 +667,9 @@ const styles = {
     minHeight: "90px",
     resize: "vertical",
     boxSizing: "border-box",
-    border: "1px solid #dce2ec",
+    border: "1px solid var(--line)",
     borderRadius: "11px",
     padding: "12px",
-    outline: "none",
     fontSize: "14px",
   },
 
@@ -677,7 +678,7 @@ const styles = {
     flexWrap: "wrap",
     gap: "18px",
     padding: "16px",
-    background: "#f8faff",
+    background: "var(--surface-soft)",
     borderRadius: "13px",
     marginBottom: "16px",
   },
@@ -691,11 +692,11 @@ const styles = {
   },
 
   message: {
-    background: "#eef7ff",
+    background: "var(--surface-soft)",
     padding: "12px 14px",
     borderRadius: "10px",
     marginBottom: "14px",
-    color: "#24588f",
+    color: "var(--copper-ink)",
     fontSize: "13px",
   },
 
@@ -705,8 +706,8 @@ const styles = {
     borderRadius: "12px",
     padding: "14px",
     background:
-      "linear-gradient(90deg,#2563eb,#7c3aed)",
-    color: "white",
+      "var(--gold-soft)",
+    color: "var(--ink)",
     fontWeight: "bold",
     cursor: "pointer",
     fontSize: "15px",
@@ -725,8 +726,8 @@ const styles = {
   },
 
   counter: {
-    background: "#eaf0ff",
-    color: "#3159b8",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
     borderRadius: "999px",
     padding: "6px 11px",
     fontSize: "12px",
@@ -736,16 +737,16 @@ const styles = {
   cards: {
     display: "grid",
     gridTemplateColumns:
-      "repeat(auto-fit,minmax(280px,1fr))",
+      "repeat(auto-fit,minmax(min(100%, 280px),1fr))",
     gap: "16px",
   },
 
   card: {
     background: "white",
-    border: "1px solid #e7ebf3",
+    border: "1px solid var(--line)",
     borderRadius: "18px",
     padding: "19px",
-    boxShadow: "0 6px 20px rgba(15,23,42,.04)",
+    boxShadow: "var(--shadow-sm)",
   },
 
   badges: {
@@ -756,8 +757,8 @@ const styles = {
   },
 
   published: {
-    background: "#e9fbf1",
-    color: "#16824b",
+    background: "var(--surface-soft)",
+    color: "var(--success)",
     padding: "5px 9px",
     borderRadius: "999px",
     fontSize: "11px",
@@ -765,8 +766,8 @@ const styles = {
   },
 
   draft: {
-    background: "#fff7e6",
-    color: "#a56300",
+    background: "var(--surface-soft)",
+    color: "var(--danger)",
     padding: "5px 9px",
     borderRadius: "999px",
     fontSize: "11px",
@@ -774,8 +775,8 @@ const styles = {
   },
 
   featured: {
-    background: "#fff7d6",
-    color: "#9a6a00",
+    background: "var(--surface-soft)",
+    color: "var(--danger)",
     padding: "5px 9px",
     borderRadius: "999px",
     fontSize: "11px",
@@ -789,7 +790,7 @@ const styles = {
 
   cardText: {
     margin: "0 0 14px",
-    color: "#697386",
+    color: "var(--muted)",
     fontSize: "13px",
     lineHeight: 1.7,
   },
@@ -799,7 +800,7 @@ const styles = {
     gap: "12px",
     flexWrap: "wrap",
     fontSize: "12px",
-    color: "#596579",
+    color: "var(--muted)",
     marginBottom: "17px",
   },
 
@@ -810,8 +811,8 @@ const styles = {
   },
 
   questionsButton: {
-    background: "#edf3ff",
-    color: "#2859b8",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
     padding: "9px 12px",
     borderRadius: "9px",
     fontWeight: "bold",
@@ -821,8 +822,8 @@ const styles = {
 
   statusButton: {
     border: 0,
-    background: "#f2edff",
-    color: "#6735b5",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
     padding: "9px 12px",
     borderRadius: "9px",
     fontWeight: "bold",
@@ -832,8 +833,8 @@ const styles = {
 
   deleteButton: {
     border: 0,
-    background: "#fff0f1",
-    color: "#be123c",
+    background: "var(--surface-soft)",
+    color: "var(--danger)",
     padding: "9px 12px",
     borderRadius: "9px",
     fontWeight: "bold",
@@ -843,10 +844,10 @@ const styles = {
 
   empty: {
     background: "white",
-    border: "1px solid #e7ebf3",
+    border: "1px solid var(--line)",
     borderRadius: "16px",
     padding: "35px",
     textAlign: "center",
-    color: "#7b8496",
+    color: "var(--muted)",
   },
 };

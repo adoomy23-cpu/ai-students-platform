@@ -1,6 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { useDialogs } from "../../../components/platform/DialogProvider";
+
+import { Button, Card, EmptyState, Feedback, Input, PageSurface, Select, StatusBadge } from "../../../components/platform/PlatformUI";
+
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -19,6 +22,7 @@ async function requestData() {
 }
 
 export default function ClassroomsPage() {
+  const { requestText } = useDialogs();
   const [grades, setGrades] = useState([]);
   const [classrooms, setClassrooms] = useState([]);
   const [gradeId, setGradeId] = useState("");
@@ -87,7 +91,7 @@ export default function ClassroomsPage() {
       setMessage("لم تتم إضافة الفصل: " + error.message);
     } else {
       setName("");
-      setMessage("تمت إضافة الفصل بنجاح ✅");
+      setMessage("تمت إضافة الفصل بنجاح");
       setLoading(true);
       await loadData();
     }
@@ -109,7 +113,7 @@ export default function ClassroomsPage() {
     setMessage(
       classroom.is_active
         ? "تم تعطيل الفصل."
-        : "تم تفعيل الفصل بنجاح ✅"
+        : "تم تفعيل الفصل بنجاح"
     );
 
     setLoading(true);
@@ -117,7 +121,7 @@ export default function ClassroomsPage() {
   }
 
   async function renameClassroom(classroom) {
-    const newName = window.prompt("اكتب الاسم الجديد للفصل:", classroom.name);
+    const newName = await requestText("اكتب الاسم الجديد للفصل:", classroom.name);
 
     if (!newName || !newName.trim() || newName.trim() === classroom.name) {
       return;
@@ -133,15 +137,15 @@ export default function ClassroomsPage() {
       return;
     }
 
-    setMessage("تم تعديل اسم الفصل بنجاح ✅");
+    setMessage("تم تعديل اسم الفصل بنجاح");
     setLoading(true);
     await loadData();
   }
 
   return (
-    <main style={styles.page} dir="rtl">
+    <PageSurface style={styles.page} dir="rtl">
       <div style={styles.container}>
-        <div style={styles.topRow}>
+        <div className="platform-heading" style={styles.topRow}>
           <div>
             <h1 style={styles.title}>إدارة الصفوف والفصول</h1>
             <p style={styles.subtitle}>
@@ -149,19 +153,17 @@ export default function ClassroomsPage() {
             </p>
           </div>
 
-          <Link href="/admin" style={styles.backButton}>
-            العودة للوحة الإدارة
-          </Link>
+
         </div>
 
-        <section style={styles.card}>
+        <Card as="section" style={styles.card}>
           <h2 style={styles.cardTitle}>إضافة فصل جديد</h2>
 
           <form onSubmit={addClassroom} style={styles.form}>
             <div style={styles.field}>
-              <label style={styles.label}>الصف الدراسي</label>
+              <label htmlFor="field-adminclassrooms-1" style={styles.label}>الصف الدراسي</label>
 
-              <select
+              <Select id="field-adminclassrooms-1"
                 value={gradeId}
                 onChange={(e) => setGradeId(e.target.value)}
                 style={styles.input}
@@ -171,13 +173,13 @@ export default function ClassroomsPage() {
                     {grade.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             <div style={styles.field}>
-              <label style={styles.label}>اسم الفصل</label>
+              <label htmlFor="field-adminclassrooms-2" style={styles.label}>اسم الفصل</label>
 
-              <input
+              <Input id="field-adminclassrooms-2"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="مثال: أ"
@@ -185,32 +187,32 @@ export default function ClassroomsPage() {
               />
             </div>
 
-            <button
+            <Button variant="primary" icon="check"
               type="submit"
               disabled={saving}
               style={styles.primaryButton}
             >
               {saving ? "جارٍ الإضافة..." : "＋ إضافة الفصل"}
-            </button>
+            </Button>
           </form>
 
-          {message && <div style={styles.message}>{message}</div>}
-        </section>
+          {message && <Feedback style={styles.message}>{message}</Feedback>}
+        </Card>
 
-        <section style={styles.card}>
-          <div style={styles.listHeader}>
+        <Card as="section" style={styles.card}>
+          <div className="platform-heading" style={styles.listHeader}>
             <h2 style={styles.cardTitle}>الفصول الحالية</h2>
-            <span style={styles.counter}>{classrooms.length} فصل</span>
+            <StatusBadge style={styles.counter}>{classrooms.length} فصل</StatusBadge>
           </div>
 
           {loading ? (
-            <div style={styles.empty}>جارٍ تحميل البيانات...</div>
+            <EmptyState loading={true} style={styles.empty}>جارٍ تحميل البيانات...</EmptyState>
           ) : classrooms.length === 0 ? (
-            <div style={styles.empty}>
+            <EmptyState style={styles.empty}>
               لا توجد فصول حتى الآن. أضف أول فصل من الأعلى.
-            </div>
+            </EmptyState>
           ) : (
-            <div style={styles.grid}>
+            <div className="platform-grid" style={styles.grid}>
               {classrooms.map((classroom) => (
                 <div
                   key={classroom.id}
@@ -246,39 +248,39 @@ export default function ClassroomsPage() {
                   </div>
 
                   <div style={styles.actions}>
-                    <button
+                    <Button variant="secondary" icon="pencil"
                       type="button"
                       onClick={() => renameClassroom(classroom)}
                       style={styles.editButton}
                     >
                       تعديل الاسم
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button variant="secondary" icon="shield"
                       type="button"
                       onClick={() => toggleClassroom(classroom)}
                       style={styles.toggleButton}
                     >
                       {classroom.is_active ? "تعطيل" : "تفعيل"}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </section>
+        </Card>
       </div>
-    </main>
+    </PageSurface>
   );
 }
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    background: "#f6f8fc",
+    minHeight: "360px",
+    background: "var(--surface-soft)",
     padding: "32px 16px",
-    fontFamily: "Arial, sans-serif",
-    color: "#172033",
+    fontFamily: "var(--font-body)",
+    color: "var(--ink)",
   },
   container: {
     maxWidth: "1100px",
@@ -299,25 +301,25 @@ const styles = {
   },
   subtitle: {
     margin: "8px 0 0",
-    color: "#667085",
+    color: "var(--muted)",
     lineHeight: "1.8",
   },
   backButton: {
     textDecoration: "none",
-    background: "#ffffff",
-    border: "1px solid #e4e7ec",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
     padding: "11px 16px",
     borderRadius: "12px",
-    color: "#344054",
+    color: "var(--muted)",
     fontWeight: "700",
   },
   card: {
-    background: "#ffffff",
-    border: "1px solid #eaecf0",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
     borderRadius: "20px",
     padding: "22px",
     marginBottom: "20px",
-    boxShadow: "0 8px 24px rgba(16,24,40,0.05)",
+    boxShadow: "var(--shadow-sm)",
   },
   cardTitle: {
     margin: 0,
@@ -344,25 +346,24 @@ const styles = {
     width: "100%",
     boxSizing: "border-box",
     padding: "12px 14px",
-    border: "1px solid #d0d5dd",
+    border: "1px solid var(--line)",
     borderRadius: "12px",
-    background: "#ffffff",
+    background: "var(--surface)",
     fontSize: "16px",
-    outline: "none",
   },
   primaryButton: {
     border: 0,
     borderRadius: "12px",
     padding: "13px 20px",
-    background: "#3157d5",
-    color: "#ffffff",
+    background: "var(--brand-gold)",
+    color: "var(--ink)",
     fontWeight: "800",
     cursor: "pointer",
   },
   message: {
     marginTop: "16px",
     padding: "12px 14px",
-    background: "#f8fafc",
+    background: "var(--surface-soft)",
     borderRadius: "10px",
     fontSize: "14px",
   },
@@ -374,8 +375,8 @@ const styles = {
     marginBottom: "20px",
   },
   counter: {
-    background: "#eef2ff",
-    color: "#3949ab",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
     padding: "6px 11px",
     borderRadius: "999px",
     fontSize: "13px",
@@ -383,17 +384,17 @@ const styles = {
   },
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 230px), 1fr))",
     gap: "14px",
   },
   classroomCard: {
-    border: "1px solid #eaecf0",
+    border: "1px solid var(--line)",
     borderRadius: "16px",
     padding: "17px",
-    background: "#ffffff",
+    background: "var(--surface)",
   },
   gradeName: {
-    color: "#667085",
+    color: "var(--muted)",
     fontSize: "13px",
     marginBottom: "5px",
   },
@@ -420,8 +421,8 @@ const styles = {
     flex: 1,
     padding: "9px",
     borderRadius: "10px",
-    border: "1px solid #d0d5dd",
-    background: "#ffffff",
+    border: "1px solid var(--line)",
+    background: "var(--surface)",
     cursor: "pointer",
     fontWeight: "700",
   },
@@ -429,14 +430,14 @@ const styles = {
     flex: 1,
     padding: "9px",
     borderRadius: "10px",
-    border: "1px solid #d0d5dd",
-    background: "#f8fafc",
+    border: "1px solid var(--line)",
+    background: "var(--surface-soft)",
     cursor: "pointer",
     fontWeight: "700",
   },
   empty: {
     textAlign: "center",
     padding: "36px 10px",
-    color: "#667085",
+    color: "var(--muted)",
   },
 };

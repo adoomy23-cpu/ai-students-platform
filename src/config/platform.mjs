@@ -2,7 +2,7 @@
 export const platformIdentity = Object.freeze({
   name: "منصة الذكاء الاصطناعي",
   shortName: "AI Students",
-  schoolName: "مدارس الفكر التربوية",
+  schoolName: "مدارس الفكر التربوي",
   tagline: "نتعلّم. نجرّب. نبتكر.",
 });
 export const learningPaths = Object.freeze([

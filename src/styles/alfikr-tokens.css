@@ -3,8 +3,8 @@
 @font-face { font-family:"Alfikr Sans"; src:url("/fonts/IBMPlexSansArabic-SemiBold.woff2") format("woff2"); font-weight:600; font-style:normal; font-display:swap; }
 @font-face { font-family:"Alfikr Sans"; src:url("/fonts/IBMPlexSansArabic-Bold.woff2") format("woff2"); font-weight:700; font-style:normal; font-display:swap; }
 
-/* Scoped to the approved homepage. Existing routes keep their current appearance. */
-.school-home {
+/* Shared identity: all platform routes inherit the official school palette. */
+:root, .school-home {
   --brand-gold:#e5b822;
   --brand-copper:#ab5e27;
   --brand-grey:#8a8d91;

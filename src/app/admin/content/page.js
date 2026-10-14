@@ -1,7 +1,11 @@
 "use client";
 
+import { useDialogs } from "../../../components/platform/DialogProvider";
+
+import SchoolIcon from "../../../components/brand/SchoolIcon";
+import { Button, Card, EmptyState, Feedback, Input, PageSurface, Select, StatusBadge, Textarea } from "../../../components/platform/PlatformUI";
+
 import ContentImage from "../../../components/ui/ContentImage";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 
@@ -15,6 +19,7 @@ async function requestData() {
 }
 
 export default function ContentPage() {
+  const { confirmAction } = useDialogs();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -35,7 +40,7 @@ export default function ContentPage() {
   const receiveData = useCallback(({ data, error }) => {
     if (error) {
       console.error(error);
-      setMessage("❌ تعذر تحميل المحتوى.");
+      setMessage("تعذر تحميل المحتوى.");
     } else {
       setItems(data || []);
     }
@@ -71,7 +76,7 @@ export default function ContentPage() {
     e.preventDefault();
 
     if (!form.title.trim()) {
-      setMessage("⚠️ اكتب عنوان المحتوى أولًا.");
+      setMessage("اكتب عنوان المحتوى أولًا.");
       return;
     }
 
@@ -96,12 +101,12 @@ export default function ContentPage() {
 
     if (error) {
       console.error(error);
-      setMessage(`❌ ${error?.message || "حدث خطأ غير معروف"}`);
+      setMessage(` ${error?.message || "حدث خطأ غير معروف"}`);
       setSaving(false);
       return;
     }
 
-    setMessage("✅ تمت إضافة المحتوى بنجاح.");
+    setMessage("تمت إضافة المحتوى بنجاح.");
 
     setForm({
       title: "",
@@ -121,7 +126,7 @@ export default function ContentPage() {
   }
 
   async function deleteContent(id) {
-    const confirmed = window.confirm(
+    const confirmed = await confirmAction(
       "هل أنت متأكد من حذف هذا المحتوى؟"
     );
 
@@ -134,33 +139,31 @@ export default function ContentPage() {
 
     if (error) {
       console.error(error);
-      setMessage("❌ تعذر حذف المحتوى.");
+      setMessage("تعذر حذف المحتوى.");
       return;
     }
 
-    setMessage("✅ تم حذف المحتوى.");
+    setMessage("تم حذف المحتوى.");
     setLoading(true);
     await loadContent();
   }
 
   function contentTypeName(type) {
-    if (type === "video") return "🎬 فيديو";
-    if (type === "lesson") return "📘 درس";
-    if (type === "article") return "📄 مادة تعليمية";
-    if (type === "link") return "🔗 رابط مفيد";
+    if (type === "video") return "فيديو";
+    if (type === "lesson") return "درس";
+    if (type === "article") return "مادة تعليمية";
+    if (type === "link") return "رابط مفيد";
 
-    return "📚 محتوى";
+    return "محتوى";
   }
 
   return (
-    <main style={styles.page} dir="rtl">
+    <PageSurface style={styles.page} dir="rtl">
       <div style={styles.container}>
-        <Link href="/admin" style={styles.back}>
-          ← العودة للوحة التحكم
-        </Link>
 
-        <div style={styles.header}>
-          <div style={styles.icon}>🧠</div>
+
+        <div className="platform-heading" style={styles.header}>
+          <div style={styles.icon}><SchoolIcon name="spark" size={32} /></div>
 
           <div>
             <h1 style={styles.title}>إدارة المحتوى</h1>
@@ -171,11 +174,11 @@ export default function ContentPage() {
           </div>
         </div>
 
-        <section style={styles.formCard}>
+        <Card as="section" style={styles.formCard}>
           <div style={styles.formTitleRow}>
             <div>
               <h2 style={styles.cardTitle}>
-                ➕ إضافة محتوى جديد
+                <SchoolIcon name="pencil" size={22} /> إضافة محتوى جديد
               </h2>
 
               <p style={styles.note}>
@@ -185,13 +188,13 @@ export default function ContentPage() {
           </div>
 
           <form onSubmit={addContent} style={styles.form}>
-            <div style={styles.columns}>
+            <div className="platform-columns" style={styles.columns}>
               <div>
-                <label style={styles.label}>
+                <label htmlFor="field-admincontent-1" style={styles.label}>
                   عنوان المحتوى *
                 </label>
 
-                <input
+                <Input id="field-admincontent-1"
                   style={styles.input}
                   value={form.title}
                   onChange={(e) =>
@@ -202,11 +205,11 @@ export default function ContentPage() {
               </div>
 
               <div>
-                <label style={styles.label}>
+                <label htmlFor="field-admincontent-2" style={styles.label}>
                   نوع المحتوى
                 </label>
 
-                <select
+                <Select id="field-admincontent-2"
                   style={styles.input}
                   value={form.content_type}
                   onChange={(e) =>
@@ -214,30 +217,30 @@ export default function ContentPage() {
                   }
                 >
                   <option value="video">
-                    🎬 فيديو
+                     فيديو
                   </option>
 
                   <option value="lesson">
-                    📘 درس
+                     درس
                   </option>
 
                   <option value="article">
-                    📄 مادة تعليمية
+                     مادة تعليمية
                   </option>
 
                   <option value="link">
-                    🔗 رابط مفيد
+                     رابط مفيد
                   </option>
-                </select>
+                </Select>
               </div>
             </div>
 
             <div>
-              <label style={styles.label}>
+              <label htmlFor="field-admincontent-3" style={styles.label}>
                 وصف مختصر
               </label>
 
-              <textarea
+              <Textarea id="field-admincontent-3"
                 style={styles.textarea}
                 value={form.description}
                 onChange={(e) =>
@@ -247,13 +250,13 @@ export default function ContentPage() {
               />
             </div>
 
-            <div style={styles.columns}>
+            <div className="platform-columns" style={styles.columns}>
               <div>
-                <label style={styles.label}>
+                <label htmlFor="field-admincontent-4" style={styles.label}>
                   رابط الفيديو أو المحتوى
                 </label>
 
-                <input
+                <Input id="field-admincontent-4"
                   style={styles.input}
                   value={form.content_url}
                   onChange={(e) =>
@@ -264,11 +267,11 @@ export default function ContentPage() {
               </div>
 
               <div>
-                <label style={styles.label}>
+                <label htmlFor="field-admincontent-5" style={styles.label}>
                   رابط الصورة المصغرة
                 </label>
 
-                <input
+                <Input id="field-admincontent-5"
                   style={styles.input}
                   value={form.thumbnail_url}
                   onChange={(e) =>
@@ -279,13 +282,13 @@ export default function ContentPage() {
               </div>
             </div>
 
-            <div style={styles.columns}>
+            <div className="platform-columns" style={styles.columns}>
               <div>
-                <label style={styles.label}>
+                <label htmlFor="field-admincontent-6" style={styles.label}>
                   الدرس المرتبط
                 </label>
 
-                <input
+                <Input id="field-admincontent-6"
                   style={styles.input}
                   value={form.related_lesson}
                   onChange={(e) =>
@@ -296,11 +299,11 @@ export default function ContentPage() {
               </div>
 
               <div>
-                <label style={styles.label}>
+                <label htmlFor="field-admincontent-7" style={styles.label}>
                   حالة المحتوى
                 </label>
 
-                <select
+                <Select id="field-admincontent-7"
                   style={styles.input}
                   value={form.status}
                   onChange={(e) =>
@@ -308,19 +311,19 @@ export default function ContentPage() {
                   }
                 >
                   <option value="published">
-                    ✅ منشور
+                     منشور
                   </option>
 
                   <option value="draft">
-                    📝 مسودة
+                     مسودة
                   </option>
-                </select>
+                </Select>
               </div>
             </div>
 
-            <div style={styles.options}>
+            <div className="platform-grid" style={styles.options}>
               <label style={styles.checkbox}>
-                <input
+                <Input
                   type="checkbox"
                   checked={form.is_featured}
                   onChange={(e) =>
@@ -331,15 +334,15 @@ export default function ContentPage() {
                   }
                 />
 
-                <span>⭐ جعله محتوى مميزًا</span>
+                <span><SchoolIcon name="spark" size={22} /> جعله محتوى مميزًا</span>
               </label>
 
               <div style={styles.order}>
-                <label style={styles.orderLabel}>
+                <label htmlFor="field-admincontent-8" style={styles.orderLabel}>
                   ترتيب الظهور
                 </label>
 
-                <input
+                <Input id="field-admincontent-8"
                   type="number"
                   min="0"
                   style={styles.numberInput}
@@ -355,12 +358,12 @@ export default function ContentPage() {
             </div>
 
             {message && (
-              <div style={styles.message}>
+              <Feedback style={styles.message}>
                 {message}
-              </div>
+              </Feedback>
             )}
 
-            <button
+            <Button variant="primary" icon="check"
               type="submit"
               disabled={saving}
               style={{
@@ -370,33 +373,33 @@ export default function ContentPage() {
             >
               {saving
                 ? "جاري الحفظ..."
-                : "💾 حفظ ونشر المحتوى"}
-            </button>
+                : "حفظ ونشر المحتوى"}
+            </Button>
           </form>
-        </section>
+        </Card>
 
-        <div style={styles.sectionHeader}>
+        <div className="platform-heading" style={styles.sectionHeader}>
           <h2 style={styles.sectionTitle}>
-            📚 المحتوى الحالي
+            <SchoolIcon name="book" size={22} /> المحتوى الحالي
           </h2>
 
-          <span style={styles.count}>
+          <StatusBadge style={styles.count}>
             {items.length} محتوى
-          </span>
+          </StatusBadge>
         </div>
 
         {loading ? (
-          <div style={styles.empty}>
+          <EmptyState loading={true} style={styles.empty}>
             جاري تحميل المحتوى...
-          </div>
+          </EmptyState>
         ) : items.length === 0 ? (
-          <div style={styles.empty}>
+          <EmptyState style={styles.empty}>
             لا يوجد محتوى حتى الآن
             <br />
-            ✨ أضف أول محتوى من النموذج بالأعلى
-          </div>
+            <SchoolIcon name="spark" size={22} /> أضف أول محتوى من النموذج بالأعلى
+          </EmptyState>
         ) : (
-          <div style={styles.grid}>
+          <div className="platform-grid" style={styles.grid}>
             {items.map((item) => (
               <article
                 key={item.id}
@@ -432,13 +435,13 @@ export default function ContentPage() {
                       }}
                     >
                       {item.status === "published"
-                        ? "✅ منشور"
-                        : "📝 مسودة"}
+                        ? "منشور"
+                        : "مسودة"}
                     </span>
                   </div>
 
                   <h3 style={styles.itemTitle}>
-                    {item.is_featured ? "⭐ " : ""}
+                    <SchoolIcon name={item.is_featured ? "check" : "spark"} size={18} />
                     {item.title}
                   </h3>
 
@@ -450,7 +453,7 @@ export default function ContentPage() {
 
                   {item.related_lesson && (
                     <div style={styles.lesson}>
-                      📚 {item.related_lesson}
+                      <SchoolIcon name="book" size={22} /> {item.related_lesson}
                     </div>
                   )}
 
@@ -462,19 +465,19 @@ export default function ContentPage() {
                         rel="noreferrer"
                         style={styles.openButton}
                       >
-                        فتح المحتوى ↗
+                        فتح المحتوى <SchoolIcon name="spark" size={22} />
                       </a>
                     )}
 
-                    <button
+                    <Button variant="danger" icon="trash"
                       type="button"
                       onClick={() =>
                         deleteContent(item.id)
                       }
                       style={styles.deleteButton}
                     >
-                      🗑 حذف
-                    </button>
+                      حذف
+                    </Button>
                   </div>
                 </div>
               </article>
@@ -482,17 +485,17 @@ export default function ContentPage() {
           </div>
         )}
       </div>
-    </main>
+    </PageSurface>
   );
 }
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    background: "#f6f8fc",
-    padding: "30px 16px 70px",
-    fontFamily: "Arial, sans-serif",
-    color: "#172033",
+    minHeight: "360px",
+    background: "var(--surface-soft)",
+    padding: "24px 16px 36px",
+    fontFamily: "var(--font-body)",
+    color: "var(--ink)",
   },
 
   container: {
@@ -504,7 +507,7 @@ const styles = {
     display: "inline-block",
     marginBottom: "25px",
     textDecoration: "none",
-    color: "#2563eb",
+    color: "var(--copper-ink)",
     fontWeight: "bold",
   },
 
@@ -516,8 +519,8 @@ const styles = {
   },
 
   icon: {
-    fontSize: "38px",
-    background: "#eef2ff",
+    fontSize: "clamp(26px, 4vw, 34px)",
+    background: "var(--surface-soft)",
     width: "70px",
     height: "70px",
     borderRadius: "20px",
@@ -533,15 +536,15 @@ const styles = {
 
   subtitle: {
     marginTop: "8px",
-    color: "#667085",
+    color: "var(--muted)",
     lineHeight: 1.8,
   },
 
   formCard: {
-    background: "#ffffff",
+    background: "var(--surface)",
     padding: "25px",
     borderRadius: "20px",
-    boxShadow: "0 6px 25px rgba(0,0,0,0.05)",
+    boxShadow: "var(--shadow-sm)",
     marginBottom: "35px",
   },
 
@@ -555,7 +558,7 @@ const styles = {
   },
 
   note: {
-    color: "#667085",
+    color: "var(--muted)",
     marginTop: "8px",
   },
 
@@ -568,7 +571,7 @@ const styles = {
   columns: {
     display: "grid",
     gridTemplateColumns:
-      "repeat(auto-fit,minmax(240px,1fr))",
+      "repeat(auto-fit,minmax(min(100%, 240px),1fr))",
     gap: "16px",
   },
 
@@ -583,10 +586,10 @@ const styles = {
     width: "100%",
     boxSizing: "border-box",
     padding: "13px",
-    border: "1px solid #d0d5dd",
+    border: "1px solid var(--line)",
     borderRadius: "11px",
     fontSize: "15px",
-    background: "#fff",
+    background: "var(--surface)",
   },
 
   textarea: {
@@ -594,7 +597,7 @@ const styles = {
     minHeight: "100px",
     boxSizing: "border-box",
     padding: "13px",
-    border: "1px solid #d0d5dd",
+    border: "1px solid var(--line)",
     borderRadius: "11px",
     fontSize: "15px",
     resize: "vertical",
@@ -606,7 +609,7 @@ const styles = {
     justifyContent: "space-between",
     flexWrap: "wrap",
     gap: "15px",
-    background: "#f8fafc",
+    background: "var(--surface-soft)",
     padding: "15px",
     borderRadius: "12px",
   },
@@ -632,15 +635,15 @@ const styles = {
   numberInput: {
     width: "70px",
     padding: "9px",
-    border: "1px solid #d0d5dd",
+    border: "1px solid var(--line)",
     borderRadius: "9px",
   },
 
   message: {
     padding: "12px",
     borderRadius: "10px",
-    background: "#eff8ff",
-    color: "#175cd3",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
     lineHeight: 1.7,
   },
 
@@ -649,8 +652,8 @@ const styles = {
     borderRadius: "12px",
     padding: "15px",
     background:
-      "linear-gradient(135deg,#2563eb,#7c3aed)",
-    color: "#fff",
+      "var(--gold-soft)",
+    color: "var(--ink)",
     fontSize: "16px",
     fontWeight: "bold",
     cursor: "pointer",
@@ -668,43 +671,43 @@ const styles = {
   },
 
   count: {
-    background: "#eef2ff",
-    color: "#4338ca",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
     padding: "7px 12px",
     borderRadius: "20px",
     fontWeight: "bold",
   },
 
   empty: {
-    background: "#fff",
-    border: "1px dashed #d0d5dd",
+    background: "var(--surface)",
+    border: "1px dashed var(--line)",
     borderRadius: "18px",
     padding: "45px 20px",
     textAlign: "center",
-    color: "#667085",
+    color: "var(--muted)",
     lineHeight: 2,
   },
 
   grid: {
     display: "grid",
     gridTemplateColumns:
-      "repeat(auto-fit,minmax(270px,1fr))",
+      "repeat(auto-fit,minmax(min(100%, 270px),1fr))",
     gap: "18px",
   },
 
   item: {
-    background: "#fff",
+    background: "var(--surface)",
     borderRadius: "17px",
     overflow: "hidden",
-    border: "1px solid #eaecf0",
-    boxShadow: "0 5px 20px rgba(0,0,0,.04)",
+    border: "1px solid var(--line)",
+    boxShadow: "var(--shadow-sm)",
   },
 
   image: {
     width: "100%",
     height: "175px",
     objectFit: "cover",
-    background: "#f2f4f7",
+    background: "var(--surface-soft)",
   },
 
   itemBody: {
@@ -718,8 +721,8 @@ const styles = {
   },
 
   typeBadge: {
-    background: "#eef4ff",
-    color: "#3538cd",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
     padding: "5px 9px",
     borderRadius: "15px",
     fontSize: "12px",
@@ -739,12 +742,12 @@ const styles = {
   },
 
   description: {
-    color: "#667085",
+    color: "var(--muted)",
     lineHeight: 1.8,
   },
 
   lesson: {
-    color: "#475467",
+    color: "var(--muted)",
     fontSize: "13px",
     marginTop: "10px",
   },
@@ -759,8 +762,8 @@ const styles = {
     flex: 1,
     textAlign: "center",
     textDecoration: "none",
-    background: "#eff6ff",
-    color: "#1d4ed8",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
     padding: "10px",
     borderRadius: "9px",
     fontWeight: "bold",
@@ -769,8 +772,8 @@ const styles = {
 
   deleteButton: {
     border: 0,
-    background: "#fff1f2",
-    color: "#be123c",
+    background: "var(--surface-soft)",
+    color: "var(--danger)",
     padding: "10px 14px",
     borderRadius: "9px",
     fontWeight: "bold",

@@ -1,5 +1,8 @@
 "use client";
 
+import SchoolIcon from "../../../../components/brand/SchoolIcon";
+import { Button, EmptyState, PageSurface } from "../../../../components/platform/PlatformUI";
+
 import ContentImage from "../../../../components/ui/ContentImage";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -71,34 +74,34 @@ export default function QuizPage() {
   }
 
   if (!Number.isSafeInteger(quizId) || quizId <= 0) {
-    return <main dir="rtl" style={styles.center}>معرّف الاختبار غير صالح.</main>;
+    return <PageSurface dir="rtl" style={styles.center}>معرّف الاختبار غير صالح.</PageSurface>;
   }
 
   if (loading || loadedQuizId !== quizId) {
     return (
-      <main style={styles.center} dir="rtl">
-        <div style={{ fontSize: 48 }}>🤖</div>
+      <PageSurface style={styles.center} dir="rtl">
+        <div style={{ fontSize: 48 }}><SchoolIcon name="spark" size={22} /></div>
         <h2>جاري تحميل الاختبار...</h2>
-      </main>
+      </PageSurface>
     );
   }
 
   if (error) {
     return (
-      <main style={styles.center} dir="rtl">
+      <PageSurface style={styles.center} dir="rtl">
         <h2>تعذر فتح الاختبار</h2>
         <p>{error}</p>
-      </main>
+      </PageSurface>
     );
   }
 
   const answeredCount = Object.keys(answers).length;
 
   return (
-    <main style={styles.page} dir="rtl">
+    <PageSurface style={styles.page} dir="rtl">
       <div style={styles.container}>
-        <section style={styles.hero}>
-          <div style={styles.robot}>🤖</div>
+        <section className="platform-hero" style={styles.hero}>
+          <div style={styles.robot}><SchoolIcon name="spark" size={32} /></div>
 
           <div>
             <div style={styles.badge}>اختبار تفاعلي</div>
@@ -115,7 +118,7 @@ export default function QuizPage() {
           </div>
         </section>
 
-        <section style={styles.stats}>
+        <section className="platform-grid" style={styles.stats}>
           <div>
             <strong>{questions.length}</strong>
             <span> أسئلة</span>
@@ -128,7 +131,7 @@ export default function QuizPage() {
 
           {quiz.time_limit_minutes && (
             <div>
-              ⏱️{" "}
+              <SchoolIcon name="clock" size={22} />{" "}
               <strong>
                 {quiz.time_limit_minutes}
               </strong>
@@ -153,7 +156,7 @@ export default function QuizPage() {
           />
         </div>
 
-        <section style={styles.questions}>
+        <section className="platform-grid" style={styles.questions}>
           {questions.map((question, index) => (
             <article
               key={question.id}
@@ -181,7 +184,7 @@ export default function QuizPage() {
                 />
               )}
 
-              <div style={styles.options}>
+              <div className="platform-grid" style={styles.options}>
                 {(question.options || []).map(
                   (option) => {
                     const selected =
@@ -189,7 +192,7 @@ export default function QuizPage() {
                       option.id;
 
                     return (
-                      <button
+                      <Button variant="choice" aria-pressed={selected}
                         key={option.id}
                         type="button"
                         onClick={() =>
@@ -219,7 +222,7 @@ export default function QuizPage() {
                         <span>
                           {option.option_text}
                         </span>
-                      </button>
+                      </Button>
                     );
                   }
                 )}
@@ -229,9 +232,9 @@ export default function QuizPage() {
         </section>
 
         {questions.length === 0 && (
-          <div style={styles.empty}>
+          <EmptyState style={styles.empty}>
             لا توجد أسئلة في هذا الاختبار.
-          </div>
+          </EmptyState>
         )}
 
         {questions.length > 0 && (
@@ -241,7 +244,7 @@ export default function QuizPage() {
               {questions.length} أسئلة
             </p>
 
-            <button
+            <Button variant="primary" icon="check"
               type="button"
               disabled={
                 answeredCount !== questions.length
@@ -255,21 +258,21 @@ export default function QuizPage() {
               }}
             >
               إنهاء الاختبار وإرسال الإجابات
-            </button>
+            </Button>
           </section>
         )}
       </div>
-    </main>
+    </PageSurface>
   );
 }
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    padding: "30px 16px 70px",
-    background: "#f5f8ff",
-    fontFamily: "Arial, sans-serif",
-    color: "#172033",
+    minHeight: "360px",
+    padding: "24px 16px 36px",
+    background: "var(--surface-soft)",
+    fontFamily: "var(--font-body)",
+    color: "var(--ink)",
   },
 
   container: {
@@ -279,8 +282,8 @@ const styles = {
 
   hero: {
     background:
-      "linear-gradient(135deg,#315ed6,#7065e8)",
-    color: "white",
+      "var(--gold-soft)",
+    color: "var(--ink)",
     borderRadius: 26,
     padding: 28,
     display: "flex",
@@ -328,7 +331,7 @@ const styles = {
 
   progress: {
     height: 8,
-    background: "#e5eaf4",
+    background: "var(--surface-soft)",
     borderRadius: 10,
     margin: "18px 0 26px",
     overflow: "hidden",
@@ -336,7 +339,7 @@ const styles = {
 
   progressValue: {
     height: "100%",
-    background: "#315ed6",
+    background: "var(--brand-gold)",
     transition: "width .3s",
   },
 
@@ -349,7 +352,7 @@ const styles = {
     background: "white",
     padding: 24,
     borderRadius: 22,
-    border: "1px solid #e5eaf2",
+    border: "1px solid var(--line)",
   },
 
   questionHeader: {
@@ -358,14 +361,14 @@ const styles = {
   },
 
   number: {
-    background: "#edf3ff",
-    color: "#315ed6",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
     padding: "6px 12px",
     borderRadius: 20,
   },
 
   points: {
-    color: "#667085",
+    color: "var(--muted)",
   },
 
   questionText: {
@@ -389,7 +392,7 @@ const styles = {
   option: {
     padding: "15px 16px",
     background: "white",
-    border: "1px solid #dfe5ef",
+    border: "1px solid var(--line)",
     borderRadius: 15,
     textAlign: "right",
     fontSize: 16,
@@ -400,24 +403,24 @@ const styles = {
   },
 
   selected: {
-    background: "#f1f5ff",
-    border: "2px solid #4169dc",
+    background: "var(--surface-soft)",
+    border: "2px solid var(--brand-copper)",
   },
 
   circle: {
     width: 24,
     height: 24,
     borderRadius: "50%",
-    border: "2px solid #cbd3e1",
+    border: "2px solid var(--line)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
 
   circleSelected: {
-    background: "#4169dc",
-    borderColor: "#4169dc",
-    color: "white",
+    background: "var(--brand-gold)",
+    borderColor: "var(--brand-copper)",
+    color: "var(--ink)",
   },
 
   finish: {
@@ -433,8 +436,8 @@ const styles = {
     padding: 16,
     border: 0,
     borderRadius: 14,
-    background: "#315ed6",
-    color: "white",
+    background: "var(--brand-gold)",
+    color: "var(--ink)",
     fontSize: 17,
     fontWeight: 700,
   },
@@ -447,11 +450,11 @@ const styles = {
   },
 
   center: {
-    minHeight: "100vh",
+    minHeight: "360px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "var(--font-body)",
   },
 };

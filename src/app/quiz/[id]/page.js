@@ -1,7 +1,11 @@
 "use client";
 
+import { useDialogs } from "../../../components/platform/DialogProvider";
+
+import SchoolIcon from "../../../components/brand/SchoolIcon";
+import { EmptyState, Feedback, Button, Card, PageSurface, Select } from "../../../components/platform/PlatformUI";
+
 import ContentImage from "../../../components/ui/ContentImage";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -22,6 +26,7 @@ async function requestQuiz(quizId) {
 }
 
 export default function QuizPage() {
+  const { notify } = useDialogs();
   const params = useParams();
   const quizId = Number(params?.id);
 
@@ -111,24 +116,22 @@ export default function QuizPage() {
   }
 
   if (!Number.isSafeInteger(quizId) || quizId <= 0) {
-    return <main dir="rtl" style={styles.center}>معرّف الاختبار غير صالح.</main>;
+    return <PageSurface dir="rtl" style={styles.center}><Feedback tone="error">معرّف الاختبار غير صالح.</Feedback></PageSurface>;
   }
 
   if (loading || loadedQuizId !== quizId) {
     return (
-      <main dir="rtl" style={styles.center}>
-        <div style={{ fontSize: 50 }}>🤖</div>
-        <h2>جاري تحميل الاختبار...</h2>
-      </main>
+      <PageSurface dir="rtl" style={styles.center}>
+        <EmptyState loading>جاري تحميل الاختبار...</EmptyState>
+      </PageSurface>
     );
   }
 
   if (error) {
     return (
-      <main dir="rtl" style={styles.center}>
-        <h2>تعذر فتح الاختبار</h2>
-        <p>{error}</p>
-      </main>
+      <PageSurface dir="rtl" style={styles.center}>
+        <Feedback tone="error"><h2>تعذر فتح الاختبار</h2><p>{error}</p></Feedback>
+      </PageSurface>
     );
   }
 
@@ -142,7 +145,7 @@ export default function QuizPage() {
 
   if (!studentReady) {
     return (
-      <main dir="rtl" style={styles.page}>
+      <PageSurface dir="rtl" style={styles.page}>
         <div style={styles.container}>
           <section
             style={{
@@ -151,21 +154,21 @@ export default function QuizPage() {
               padding: "28px",
               maxWidth: "650px",
               margin: "40px auto",
-              border: "1px solid #e5eaf2",
+              border: "1px solid var(--line)",
             }}
           >
             <div style={{ textAlign: "center", marginBottom: "25px" }}>
-              <div style={{ fontSize: "48px" }}>👋</div>
+              <div style={{ fontSize: "48px" }}><SchoolIcon name="teacher" size={22} /></div>
               <h1 style={{ marginBottom: "8px" }}>قبل أن تبدأ الاختبار</h1>
-              <p style={{ color: "#667085" }}>
+              <p style={{ color: "var(--muted)" }}>
                 اختر صفك وفصلك ثم اسمك
               </p>
             </div>
 
             <div style={{ display: "grid", gap: "16px" }}>
               <div>
-                <label>الصف الدراسي</label>
-                <select
+                <label htmlFor="field-quizid-1">الصف الدراسي</label>
+                <Select id="field-quizid-1"
                   value={gradeId}
                   onChange={(e) => {
                     setGradeId(e.target.value);
@@ -177,7 +180,7 @@ export default function QuizPage() {
                     padding: "14px",
                     marginTop: "7px",
                     borderRadius: "12px",
-                    border: "1px solid #d8deea",
+                    border: "1px solid var(--line)",
                     background: "white",
                     fontSize: "16px",
                   }}
@@ -188,12 +191,12 @@ export default function QuizPage() {
                       {grade.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               <div>
-                <label>الفصل</label>
-                <select
+                <label htmlFor="field-quizid-2">الفصل</label>
+                <Select id="field-quizid-2"
                   value={classroomId}
                   disabled={!gradeId}
                   onChange={(e) => {
@@ -205,7 +208,7 @@ export default function QuizPage() {
                     padding: "14px",
                     marginTop: "7px",
                     borderRadius: "12px",
-                    border: "1px solid #d8deea",
+                    border: "1px solid var(--line)",
                     background: "white",
                     fontSize: "16px",
                   }}
@@ -216,12 +219,12 @@ export default function QuizPage() {
                       {room.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               <div>
-                <label>اسم الطالب</label>
-                <select
+                <label htmlFor="field-quizid-3">اسم الطالب</label>
+                <Select id="field-quizid-3"
                   value={studentId}
                   disabled={!classroomId}
                   onChange={(e) => setStudentId(e.target.value)}
@@ -230,7 +233,7 @@ export default function QuizPage() {
                     padding: "14px",
                     marginTop: "7px",
                     borderRadius: "12px",
-                    border: "1px solid #d8deea",
+                    border: "1px solid var(--line)",
                     background: "white",
                     fontSize: "16px",
                   }}
@@ -241,10 +244,10 @@ export default function QuizPage() {
                       {student.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
 
-              <button
+              <Button variant="primary"
                 type="button"
                 disabled={!studentId}
                 onClick={() => setStudentReady(true)}
@@ -253,31 +256,31 @@ export default function QuizPage() {
                   padding: "15px",
                   border: 0,
                   borderRadius: "13px",
-                  background: "#315ed6",
-                  color: "white",
+                  background: "var(--brand-gold)",
+                  color: "var(--ink)",
                   fontSize: "17px",
                   fontWeight: "700",
                   opacity: studentId ? 1 : 0.45,
                   cursor: studentId ? "pointer" : "not-allowed",
                 }}
               >
-                🚀 ابدأ الاختبار
-              </button>
+                <SchoolIcon name="rocket" size={22} /> ابدأ الاختبار
+              </Button>
             </div>
           </section>
         </div>
-      </main>
+      </PageSurface>
     );
   }
 
   async function submitQuiz() {
     if (!studentId) {
-      alert("اختر اسم الطالب أولاً");
+      await notify("اختر اسم الطالب أولاً");
       return;
     }
 
     if (Object.keys(answers).length !== questions.length) {
-      alert("أجب عن جميع الأسئلة أولاً");
+      await notify("أجب عن جميع الأسئلة أولاً");
       return;
     }
 
@@ -292,7 +295,7 @@ export default function QuizPage() {
 
     if (error) {
       console.error(error);
-      alert("حدث خطأ أثناء إرسال الإجابات");
+      await notify("حدث خطأ أثناء إرسال الإجابات");
       return;
     }
 
@@ -313,16 +316,16 @@ export default function QuizPage() {
         : 0;
 
     const message =
-      percentage >= 90 ? "ممتاز جدًا! أداء رائع 🌟" :
-      percentage >= 75 ? "أحسنت! نتيجة جميلة 👏" :
-      percentage >= 50 ? "جيد! استمر في التقدم 💪" :
-      "محاولة جميلة، وبالتدريب ستكون أفضل 🚀";
+      percentage >= 90 ? "ممتاز جدًا! أداء رائع" :
+      percentage >= 75 ? "أحسنت! نتيجة جميلة" :
+      percentage >= 50 ? "جيد! استمر في التقدم" :
+      "محاولة جميلة، وبالتدريب ستكون أفضل";
 
     return (
-      <main dir="rtl" style={styles.resultPage}>
-        <section style={styles.resultCard}>
+      <PageSurface dir="rtl" style={styles.resultPage}>
+        <Card as="section" style={styles.resultCard}>
           <div style={styles.resultEmoji}>
-            {percentage >= 75 ? "🏆" : "🎉"}
+            <SchoolIcon name="trophy" size={54} />
           </div>
 
           <div style={styles.resultBadge}>اكتمل الاختبار بنجاح</div>
@@ -342,21 +345,19 @@ export default function QuizPage() {
 
           <p style={styles.resultMessage}>{message}</p>
 
-          <Link href="/" style={styles.homeButton}>
-            🏠 العودة للرئيسية
-          </Link>
-        </section>
-      </main>
+
+        </Card>
+      </PageSurface>
     );
   }
 
   const answered = Object.keys(answers).length;
 
   return (
-    <main dir="rtl" style={styles.page}>
+    <PageSurface dir="rtl" style={styles.page}>
       <div style={styles.container}>
-        <section style={styles.hero}>
-          <div style={styles.robot}>🤖</div>
+        <section className="platform-hero" style={styles.hero}>
+          <div style={styles.robot}><SchoolIcon name="spark" size={32} /></div>
           <div>
             <div style={styles.badge}>اختبار تفاعلي</div>
             <h1 style={styles.title}>{quiz.title}</h1>
@@ -370,7 +371,7 @@ export default function QuizPage() {
           <span><b>{questions.length}</b> أسئلة</span>
           <span><b>{answered}</b> تمت الإجابة</span>
           {quiz.time_limit_minutes && (
-            <span>⏱️ <b>{quiz.time_limit_minutes}</b> دقيقة</span>
+            <span><SchoolIcon name="clock" size={22} /> <b>{quiz.time_limit_minutes}</b> دقيقة</span>
           )}
         </section>
 
@@ -385,9 +386,9 @@ export default function QuizPage() {
           />
         </div>
 
-        <div style={styles.questions}>
+        <div className="platform-grid" style={styles.questions}>
           {questions.map((question, index) => (
-            <section key={question.id} style={styles.card}>
+            <Card as="section" key={question.id} style={styles.card}>
               <div style={styles.questionTop}>
                 <span style={styles.number}>السؤال {index + 1}</span>
                 <span>{question.points || 1} نقطة</span>
@@ -405,13 +406,13 @@ export default function QuizPage() {
                 />
               )}
 
-              <div style={styles.options}>
+              <div className="platform-grid" style={styles.options}>
                 {(question.options || []).map((option) => {
                   const selected =
                     answers[question.id] === option.id;
 
                   return (
-                    <button
+                    <Button variant="choice" aria-pressed={selected}
                       type="button"
                       key={option.id}
                       onClick={() =>
@@ -426,11 +427,11 @@ export default function QuizPage() {
                         {selected ? "✓" : ""}
                       </span>
                       {option.option_text}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
-            </section>
+            </Card>
           ))}
         </div>
 
@@ -440,7 +441,7 @@ export default function QuizPage() {
               أجبت عن {answered} من {questions.length} أسئلة
             </p>
 
-            <button
+            <Button variant="primary" icon="check"
               type="button"
               onClick={submitQuiz}
               disabled={answered !== questions.length}
@@ -451,32 +452,32 @@ export default function QuizPage() {
               }}
             >
               إنهاء الاختبار وإرسال الإجابات
-            </button>
+            </Button>
           </section>
         )}
       </div>
-    </main>
+    </PageSurface>
   );
 }
 
 const resultStyles = {
   resultPage: {
-    minHeight: "100vh",
-    background: "#f5f8ff",
+    minHeight: "360px",
+    background: "var(--surface-soft)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     padding: "24px",
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "var(--font-body)",
   },
   resultCard: {
     width: "100%",
     maxWidth: "520px",
-    background: "#ffffff",
+    background: "var(--surface)",
     borderRadius: "28px",
     padding: "40px 24px",
     textAlign: "center",
-    boxShadow: "0 15px 45px rgba(0,0,0,0.08)",
+    boxShadow: "var(--shadow-sm)",
   },
   resultEmoji: {
     fontSize: "64px",
@@ -484,7 +485,7 @@ const resultStyles = {
   },
   resultBadge: {
     display: "inline-block",
-    background: "#eef5ff",
+    background: "var(--surface-soft)",
     padding: "8px 16px",
     borderRadius: "30px",
     fontSize: "14px",
@@ -504,12 +505,12 @@ const resultStyles = {
     height: "150px",
     margin: "0 auto 15px",
     borderRadius: "50%",
-    background: "#eef5ff",
+    background: "var(--surface-soft)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    border: "8px solid #3b82f6",
+    border: "8px solid var(--line)",
   },
   scoreNumber: {
     fontSize: "48px",
@@ -531,8 +532,8 @@ const resultStyles = {
   homeButton: {
     display: "block",
     padding: "15px 20px",
-    background: "#2563eb",
-    color: "#ffffff",
+    background: "var(--brand-gold)",
+    color: "var(--ink)",
     borderRadius: "14px",
     textDecoration: "none",
     fontWeight: "bold",
@@ -543,19 +544,19 @@ const resultStyles = {
 const styles = {
   ...resultStyles,
   page: {
-    minHeight: "100vh",
-    background: "#f5f8ff",
-    padding: "30px 16px 70px",
-    fontFamily: "Arial, sans-serif",
-    color: "#172033",
+    minHeight: "360px",
+    background: "var(--surface-soft)",
+    padding: "24px 16px 36px",
+    fontFamily: "var(--font-body)",
+    color: "var(--ink)",
   },
   container: {
     maxWidth: "850px",
     margin: "0 auto",
   },
   hero: {
-    background: "linear-gradient(135deg,#315ed6,#7065e8)",
-    color: "white",
+    background: "var(--gold-soft)",
+    color: "var(--ink)",
     borderRadius: "26px",
     padding: "28px",
     display: "flex",
@@ -596,14 +597,14 @@ const styles = {
   },
   progress: {
     height: "8px",
-    background: "#e5eaf4",
+    background: "var(--surface-soft)",
     borderRadius: "10px",
     margin: "18px 0 26px",
     overflow: "hidden",
   },
   progressValue: {
     height: "100%",
-    background: "#315ed6",
+    background: "var(--brand-gold)",
   },
   questions: {
     display: "grid",
@@ -613,15 +614,15 @@ const styles = {
     background: "white",
     borderRadius: "22px",
     padding: "24px",
-    border: "1px solid #e5eaf2",
+    border: "1px solid var(--line)",
   },
   questionTop: {
     display: "flex",
     justifyContent: "space-between",
   },
   number: {
-    background: "#edf3ff",
-    color: "#315ed6",
+    background: "var(--surface-soft)",
+    color: "var(--copper-ink)",
     padding: "6px 12px",
     borderRadius: "20px",
   },
@@ -643,7 +644,7 @@ const styles = {
   option: {
     padding: "15px",
     background: "white",
-    border: "1px solid #dfe5ef",
+    border: "1px solid var(--line)",
     borderRadius: "15px",
     textAlign: "right",
     fontSize: "16px",
@@ -653,14 +654,14 @@ const styles = {
     gap: "12px",
   },
   selected: {
-    background: "#f1f5ff",
-    border: "2px solid #4169dc",
+    background: "var(--surface-soft)",
+    border: "2px solid var(--brand-copper)",
   },
   circle: {
     width: "24px",
     height: "24px",
     borderRadius: "50%",
-    border: "2px solid #cbd3e1",
+    border: "2px solid var(--line)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -677,17 +678,17 @@ const styles = {
     padding: "16px",
     border: 0,
     borderRadius: "14px",
-    background: "#315ed6",
-    color: "white",
+    background: "var(--brand-gold)",
+    color: "var(--ink)",
     fontSize: "17px",
     fontWeight: "700",
   },
   center: {
-    minHeight: "100vh",
+    minHeight: "360px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "var(--font-body)",
   },
 };
