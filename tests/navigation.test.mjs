@@ -31,14 +31,14 @@ test("internal back links lead to their existing parent section", () => {
   assert.equal(backDestination("/admin"), null);
   assert.equal(backDestination("/admin/students").href, "/admin");
   assert.equal(backDestination("/admin/quizzes/7").href, "/admin/quizzes");
-  assert.equal(backDestination("/quiz/7").href, "/#quizzes");
+  assert.equal(backDestination("/quiz/7").href, "/quizzes");
   assert.equal(backDestination("/challenges/7").href, "/challenges");
 });
 test("active menu indicators do not activate every link on the homepage", () => {
   assert.equal(isCurrentDestination("/", "/"), true);
-  assert.equal(isCurrentDestination("/#honor", "/"), false);
+  assert.equal(isCurrentDestination("/quizzes", "/"), false);
   assert.equal(isCurrentDestination("/admin", "/admin/results"), false);
   assert.equal(isCurrentDestination("/admin/quizzes", "/admin/quizzes/7"), true);
   assert.equal(adminNavigation.length, 7);
-  assert.equal(publicNavigation.length, 6);
+  assert.equal(publicNavigation.length, 4);
 });

@@ -6,7 +6,7 @@ export const platformIdentity = Object.freeze({
   tagline: "نتعلّم. نجرّب. نبتكر.",
 });
 export const learningPaths = Object.freeze([
-  { icon: "book", title: "تعلّم واستكشف", text: "دروس وفيديوهات تقرّب إليك الأفكار الكبيرة، بخطوات بسيطة.", href: "/content", label: "استكشف المحتوى", tone: "gold" },
-  { icon: "rocket", title: "جرّب فكرتك", text: "تحديات تفتح باب الخيال. حوّل ما تعلّمته إلى عمل من إبداعك.", href: "/challenges", label: "شاهد التحديات", tone: "copper" },
-  { icon: "spark", title: "اختبر معرفتك", text: "أسئلة تساعدك على اكتشاف ما تعلّمته. كل محاولة بداية جديدة.", href: "#quizzes", label: "استكشف الاختبارات", tone: "stone" },
+  { icon: "book", title: "تعلّم", text: "دروس وفيديوهات", href: "/content", tone: "gold" },
+  { icon: "rocket", title: "تحدَّ", text: "جرّب وشارك", href: "/challenges", tone: "copper" },
+  { icon: "check", title: "اختبر", text: "راجع معلوماتك", href: "/quizzes", tone: "stone" },
 ]);

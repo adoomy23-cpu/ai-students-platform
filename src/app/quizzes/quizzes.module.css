@@ -1,0 +1,6 @@
+.page { padding:20px 16px 32px; }
+.container { width:min(1040px,100%); margin-inline:auto; }
+.heading { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+.heading h1 { font-size:clamp(24px,4vw,30px); font-weight:600; }
+.heading p { color:var(--muted); font-size:14px; margin-top:5px; }
+@media (min-width:768px) { .page { padding:24px 32px 40px; } }

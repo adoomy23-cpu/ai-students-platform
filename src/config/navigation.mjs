@@ -1,10 +1,8 @@
 export const publicNavigation = [
   { href: "/", label: "الرئيسية", icon: "compass" },
   { href: "/content", label: "المحتوى التعليمي", icon: "book" },
-  { href: "/#quizzes", label: "الاختبارات", icon: "check" },
+  { href: "/quizzes", label: "الاختبارات", icon: "check" },
   { href: "/challenges", label: "التحديات", icon: "rocket" },
-  { href: "/#student-work", label: "أعمال الطلاب", icon: "pencil" },
-  { href: "/#honor", label: "لوحة الشرف · قريبًا", icon: "trophy" },
 ];
 export const adminNavigation = [
   { href: "/admin", label: "لوحة المعلم", icon: "teacher" },
@@ -29,7 +27,7 @@ export function backDestination(pathname) {
   if (pathname.startsWith("/admin/quizzes/")) return { href: "/admin/quizzes", label: "العودة للاختبارات" };
   if (pathname.startsWith("/admin/")) return { href: "/admin", label: "العودة للوحة المعلم" };
   if (pathname.startsWith("/challenges/")) return { href: "/challenges", label: "العودة للتحديات" };
-  if (pathname.startsWith("/quiz/")) return { href: "/#quizzes", label: "العودة للاختبارات" };
+  if (pathname.startsWith("/quiz/")) return { href: "/quizzes", label: "العودة للاختبارات" };
   return { href: "/", label: "رجوع إلى المنصة" };
 }
 
