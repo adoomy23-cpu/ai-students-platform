@@ -3,30 +3,24 @@
 import { useDialogs } from "../../../components/platform/DialogProvider";
 
 import SchoolIcon from "../../../components/brand/SchoolIcon";
-import { EmptyState, Feedback, Button, Card, PageSurface, Select } from "../../../components/platform/PlatformUI";
+import { EmptyState, Feedback, Button, Card, PageSurface } from "../../../components/platform/PlatformUI";
 
 import ContentImage from "../../../components/ui/ContentImage";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { supabase } from "@/lib/supabase";
-
-async function requestStudentData() {
-  const { data, error } = await supabase.rpc(
-        "get_student_directory"
-      );
-  return { data, error };
-}
+import { useAccess } from "../../../components/platform/AuthProvider";
+import StudentIdentity from "../../../components/student/StudentIdentity";
+import { requestStudent } from "../../../lib/student/browser-client";
 
 async function requestQuiz(quizId) {
-  const { data, error } = await supabase.rpc(
-        "get_quiz_for_student",
-        { p_quiz_id: quizId }
-      );
-  return { data, error };
+  return requestStudent("quiz.load", { id: quizId });
 }
 
 export default function QuizPage() {
   const { notify } = useDialogs();
+  const access = useAccess();
+  const studentId = access.student?.profile?.id;
+  const [submitting, setSubmitting] = useState(false);
   const params = useParams();
   const quizId = Number(params?.id);
 
@@ -38,36 +32,7 @@ export default function QuizPage() {
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
 
-  const [grades, setGrades] = useState([]);
-  const [classrooms, setClassrooms] = useState([]);
-  const [students, setStudents] = useState([]);
-
-  const [gradeId, setGradeId] = useState("");
-  const [classroomId, setClassroomId] = useState("");
-  const [studentId, setStudentId] = useState("");
   const [studentReady, setStudentReady] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-
-    requestStudentData()
-      .then(({ data, error }) => {
-      if (!active) return;
-      if (error) {
-        console.error("Student directory error:", error);
-        return;
-      }
-
-      setGrades(data?.grades || []);
-      setClassrooms(data?.classrooms || []);
-      setStudents(data?.students || []);
-      })
-      .catch(() => {
-      if (!active) return;
-      console.error("تعذر تحميل دليل الطلاب.");
-      });
-    return () => { active = false; };
-  }, []);
 
   useEffect(() => {
     if (!Number.isSafeInteger(quizId) || quizId <= 0) return;
@@ -80,8 +45,7 @@ export default function QuizPage() {
       setError("");
 
       if (error) {
-        console.error(error);
-        setError("تعذر تحميل الاختبار.");
+          setError("تعذر تحميل الاختبار.");
         setLoading(false);
         return;
       }
@@ -135,147 +99,20 @@ export default function QuizPage() {
     );
   }
 
-  const filteredClassrooms = classrooms.filter(
-    (item) => Number(item.grade_id) === Number(gradeId)
-  );
-
-  const filteredStudents = students.filter(
-    (item) => Number(item.classroom_id) === Number(classroomId)
-  );
-
   if (!studentReady) {
-    return (
-      <PageSurface dir="rtl" style={styles.page}>
-        <div style={styles.container}>
-          <section
-            style={{
-              background: "white",
-              borderRadius: "24px",
-              padding: "28px",
-              maxWidth: "650px",
-              margin: "40px auto",
-              border: "1px solid var(--line)",
-            }}
-          >
-            <div style={{ textAlign: "center", marginBottom: "25px" }}>
-              <div style={{ fontSize: "48px" }}><SchoolIcon name="teacher" size={22} /></div>
-              <h1 style={{ marginBottom: "8px" }}>قبل أن تبدأ الاختبار</h1>
-              <p style={{ color: "var(--muted)" }}>
-                اختر صفك وفصلك ثم اسمك
-              </p>
-            </div>
-
-            <div style={{ display: "grid", gap: "16px" }}>
-              <div>
-                <label htmlFor="field-quizid-1">الصف الدراسي</label>
-                <Select id="field-quizid-1"
-                  value={gradeId}
-                  onChange={(e) => {
-                    setGradeId(e.target.value);
-                    setClassroomId("");
-                    setStudentId("");
-                  }}
-                  style={{
-                    width: "100%",
-                    padding: "14px",
-                    marginTop: "7px",
-                    borderRadius: "12px",
-                    border: "1px solid var(--line)",
-                    background: "white",
-                    fontSize: "16px",
-                  }}
-                >
-                  <option value="">اختر الصف</option>
-                  {grades.map((grade) => (
-                    <option key={grade.id} value={grade.id}>
-                      {grade.name}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-
-              <div>
-                <label htmlFor="field-quizid-2">الفصل</label>
-                <Select id="field-quizid-2"
-                  value={classroomId}
-                  disabled={!gradeId}
-                  onChange={(e) => {
-                    setClassroomId(e.target.value);
-                    setStudentId("");
-                  }}
-                  style={{
-                    width: "100%",
-                    padding: "14px",
-                    marginTop: "7px",
-                    borderRadius: "12px",
-                    border: "1px solid var(--line)",
-                    background: "white",
-                    fontSize: "16px",
-                  }}
-                >
-                  <option value="">اختر الفصل</option>
-                  {filteredClassrooms.map((room) => (
-                    <option key={room.id} value={room.id}>
-                      {room.name}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-
-              <div>
-                <label htmlFor="field-quizid-3">اسم الطالب</label>
-                <Select id="field-quizid-3"
-                  value={studentId}
-                  disabled={!classroomId}
-                  onChange={(e) => setStudentId(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "14px",
-                    marginTop: "7px",
-                    borderRadius: "12px",
-                    border: "1px solid var(--line)",
-                    background: "white",
-                    fontSize: "16px",
-                  }}
-                >
-                  <option value="">اختر اسمك</option>
-                  {filteredStudents.map((student) => (
-                    <option key={student.id} value={student.id}>
-                      {student.name}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-
-              <Button variant="primary"
-                type="button"
-                disabled={!studentId}
-                onClick={() => setStudentReady(true)}
-                style={{
-                  marginTop: "8px",
-                  padding: "15px",
-                  border: 0,
-                  borderRadius: "13px",
-                  background: "var(--brand-gold)",
-                  color: "var(--ink)",
-                  fontSize: "17px",
-                  fontWeight: "700",
-                  opacity: studentId ? 1 : 0.45,
-                  cursor: studentId ? "pointer" : "not-allowed",
-                }}
-              >
-                <SchoolIcon name="rocket" size={22} /> ابدأ الاختبار
-              </Button>
-            </div>
-          </section>
-        </div>
-      </PageSurface>
-    );
+    return <PageSurface dir="rtl" style={styles.page}><div style={styles.container}>
+      <Card style={{ maxWidth: "650px", margin: "24px auto", padding: "24px" }}>
+        <h1>قبل أن تبدأ الاختبار</h1><p>ستُحفظ النتيجة باسم حسابك المعتمد.</p>
+        <StudentIdentity />
+        <Button variant="primary" icon="rocket" disabled={!studentId} onClick={() => setStudentReady(true)}>ابدأ الاختبار</Button>
+      </Card>
+    </div></PageSurface>;
   }
 
   async function submitQuiz() {
+    if (submitting) return;
     if (!studentId) {
-      await notify("اختر اسم الطالب أولاً");
+      await notify("تعذر التحقق من هوية الطالب. أعد تسجيل الدخول.");
       return;
     }
 
@@ -284,18 +121,12 @@ export default function QuizPage() {
       return;
     }
 
-    const { data, error } = await supabase.rpc(
-      "submit_quiz_attempt",
-      {
-        p_quiz_id: quizId,
-        p_student_id: Number(studentId),
-        p_answers: answers,
-      }
-    );
+    setSubmitting(true);
+    const { data, error } = await requestStudent("quiz.submit", { id: quizId, answers });
+    setSubmitting(false);
 
-    if (error) {
-      console.error(error);
-      await notify("حدث خطأ أثناء إرسال الإجابات");
+    if (error || !data || !Number.isFinite(Number(data.score)) || !Number.isFinite(Number(data.total_points))) {
+      await notify("تعذر إرسال الإجابات أو التحقق من النتيجة. حاول لاحقًا.");
       return;
     }
 
@@ -304,10 +135,6 @@ export default function QuizPage() {
       totalPoints: Number(data.total_points),
     });
   }
-
-  const selectedStudent = students.find(
-    (student) => Number(student.id) === Number(studentId)
-  );
 
   if (result) {
     const percentage =
@@ -333,7 +160,7 @@ export default function QuizPage() {
           <h1 style={styles.resultTitle}>أحسنت يا بطل!</h1>
 
           <p style={styles.resultStudent}>
-            {selectedStudent?.name || "الطالب"}
+            {access.student?.profile?.name || "الطالب"}
           </p>
 
           <div style={styles.scoreCircle}>
@@ -444,14 +271,14 @@ export default function QuizPage() {
             <Button variant="primary" icon="check"
               type="button"
               onClick={submitQuiz}
-              disabled={answered !== questions.length}
+              disabled={submitting || answered !== questions.length}
               style={{
                 ...styles.finishButton,
                 opacity:
                   answered === questions.length ? 1 : 0.45,
               }}
             >
-              إنهاء الاختبار وإرسال الإجابات
+              {submitting ? "جارٍ إرسال الإجابات…" : "إنهاء الاختبار وإرسال الإجابات"}
             </Button>
           </section>
         )}

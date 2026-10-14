@@ -115,3 +115,30 @@ test("same-account permission revocation discards rather than restores cached ad
   const stop = f.store.start(); await flush(); await f.store.refresh(); await flush();
   assert.equal(f.store.getSnapshot().retainAdmin, false); assert.equal(canAccessAdmin(f.store.getSnapshot()), false); stop();
 });
+
+test("student revalidation hides identity and authority while retaining only same-account draft eligibility", async () => {
+  const pending = deferred(); let checks = 0;
+  const approved = { status: "authenticated", role: "student", student: { state: "approved", profile: { id: 17, name: "طالب تجريبي" } } };
+  const f = setup({ session, verify: () => ++checks === 1 ? Promise.resolve(approved) : pending.promise });
+  const stop = f.store.start(); await flush();
+  assert.equal(f.store.getSnapshot().retainStudent, true);
+  f.store.refresh(); await flush();
+  assert.equal(f.store.getSnapshot().student, undefined);
+  assert.equal(f.store.getSnapshot().role, null);
+  assert.equal(f.store.getSnapshot().retainStudent, true);
+  pending.resolve({ status: "authenticated", role: null, student: { state: "suspended", profile: null } }); await flush();
+  assert.equal(f.store.getSnapshot().retainStudent, false);
+  stop();
+});
+test("logout and account changes immediately clear the previous student's display identity and draft eligibility", async () => {
+  const f = setup({ session, verify: async () => ({ status: "authenticated", role: "student", student: { state: "approved", profile: { id: 17, name: "طالب تجريبي" } } }) });
+  const stop = f.store.start(); await flush();
+  assert.equal(f.store.getSnapshot().retainStudent, true);
+  f.emit({ ...session, user: { id: "another-user" } });
+  assert.equal(f.store.getSnapshot().student, undefined);
+  assert.equal(f.store.getSnapshot().retainStudent, false);
+  f.emit(null); await flush();
+  assert.equal(f.store.getSnapshot().student, undefined);
+  assert.equal(f.store.getSnapshot().retainStudent, false);
+  stop();
+});

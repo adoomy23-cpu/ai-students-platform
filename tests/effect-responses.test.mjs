@@ -37,6 +37,8 @@ async function checkLifecycle(page, scenario) {
     console: { error() {} }, Promise, Number, String, Boolean,
     supabase: { from: () => query, rpc: () => query },
     requestAdmin: () => response,
+    requestStudent: () => response,
+    useAccess: () => ({ status: "authenticated", role: "student", student: { state: "approved", profile: { id: 1 } } }),
     useParams: () => ({ id: "1" }),
     useDialogs: () => ({ notify: async () => {}, confirmAction: async () => false, requestText: async () => null }),
     useState: (initial) => [typeof initial === "function" ? initial() : initial, (value) => updates.push(value)],

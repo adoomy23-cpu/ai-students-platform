@@ -124,3 +124,13 @@ body { background:var(--canvas); color:var(--ink); font-family:var(--font-body);
   .school-desktop-navigation .platform-navigation-list a { display:flex; align-items:center; min-height:44px; }
   .school-desktop-navigation { min-width:0; }
 }
+
+/* Account details show only the verified current student's own profile. */
+.student-account-strip { padding-block:12px 0; }
+.student-identity { display:flex; align-items:center; gap:12px; border:1px solid var(--line); border-radius:14px; padding:14px; background:var(--surface-soft); margin-block:12px; min-width:0; }
+.student-identity-icon { display:grid; place-items:center; width:40px; height:40px; border-radius:12px; background:var(--gold-soft); color:var(--copper-ink); flex-shrink:0; }
+.student-identity > div { display:grid; gap:4px; min-width:0; }
+.student-identity strong { font-weight:600; overflow-wrap:anywhere; }
+.student-identity span:not(.student-identity-icon) { font-size:13px; color:var(--muted); overflow-wrap:anywhere; }
+.student-identity-compact { padding:10px 12px; margin:0; font-size:14px; }
+.student-upload-note { font-size:13px; line-height:1.8; color:var(--muted); }

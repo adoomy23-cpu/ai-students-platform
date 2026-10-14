@@ -23,6 +23,7 @@ export const adminOperations = Object.freeze({
   "classrooms.rename": definition((p) => exact(p, { id: positiveId, name: nonempty }), (client, p) => client.from("classrooms").update({ name: p.name }).eq("id", p.id)),
   "classrooms.active": definition((p) => exact(p, { id: positiveId, is_active: bool }), (client, p) => client.from("classrooms").update({ is_active: p.is_active }).eq("id", p.id)),
   "students.list": definition(empty, (client) => client.from("students").select("id,classroom_id,student_name,is_active,created_at").order("student_name")),
+  "students.approvals": definition(empty, (client) => client.from("students").select("id,classroom_id,student_name,approval_status,is_active").not("user_id", "is", null).order("student_name")),
   "students.create": definition((p) => exact(p, { classroom_id: positiveId, student_name: nonempty, is_active: bool }), (client, p) => client.from("students").insert(p)),
   "students.rename": definition((p) => exact(p, { id: positiveId, student_name: nonempty }), (client, p) => client.from("students").update({ student_name: p.student_name }).eq("id", p.id)),
   "students.active": definition((p) => exact(p, { id: positiveId, is_active: bool }), (client, p) => client.from("students").update({ is_active: p.is_active }).eq("id", p.id)),

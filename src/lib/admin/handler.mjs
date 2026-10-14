@@ -1,7 +1,7 @@
 import { authorizeRequest, privateJson } from "../auth/server-access.mjs";
 import { adminOperations } from "./operations.mjs";
 
-async function readLimitedJson(request) {
+export async function readLimitedJson(request) {
   if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) throw new Error("invalid");
   const reader = request.body?.getReader();
   if (!reader) throw new Error("invalid");
@@ -21,7 +21,7 @@ async function readLimitedJson(request) {
   for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
   return JSON.parse(new TextDecoder().decode(bytes));
 }
-function sameSiteRequest(request) {
+export function sameSiteRequest(request) {
   if (request.headers.get("sec-fetch-site") === "cross-site") return false;
   const origin = request.headers.get("origin");
   if (!origin) return true; // Non-browser callers still need verified Bearer auth.

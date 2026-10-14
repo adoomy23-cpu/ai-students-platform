@@ -1,3 +1,4 @@
+import { canAccessStudent } from "../lib/student/profile.mjs";
 export const publicNavigation = [
   { href: "/", label: "الرئيسية", icon: "compass" },
   { href: "/content", label: "المحتوى التعليمي", icon: "book" },
@@ -13,9 +14,13 @@ export const adminNavigation = [
   { href: "/admin/challenges", label: "التحديات المنشورة", icon: "rocket" },
   { href: "/admin/results", label: "النتائج", icon: "trophy" },
 ];
+export const studentEntryNavigation = [
+  { href: "/student-login", label: "دخول الطالب", icon: "users" },
+  { href: "/register", label: "إنشاء حساب طالب", icon: "pencil" },
+];
 export function navigationForRole(role) {
   return role === "admin" ? [...adminNavigation] :
-    role === "visitor" ? [...publicNavigation, { href: "/login", label: "دخول المعلم", icon: "shield" }] : [...publicNavigation];
+    role === "visitor" ? [...publicNavigation, ...studentEntryNavigation, { href: "/login", label: "دخول المعلم", icon: "shield" }] : [...publicNavigation];
 }
 export function canAccessAdmin(access) {
   return access.status === "authenticated" && access.role === "admin" && access.signingOut !== true;
@@ -24,10 +29,11 @@ export function navigationGroupsForAccess(access) {
   const administrator = canAccessAdmin(access);
   const groups = [{ id: "sections", label: administrator ? "إدارة المنصة" : "رحلة التعلّم", links: administrator ? [...adminNavigation] : [...publicNavigation] }];
   if (access.canSignOut) groups.push({ id: "account", label: "الحساب", links: [
-    ...(access.status === "expired" ? [{ href: "/login", label: "دخول المعلم", icon: "shield" }] : []),
+    ...(!administrator && access.status === "authenticated" ? [{ href: canAccessStudent(access) || access.student?.state === "missing" ? "/complete-profile" : "/pending-approval", label: "حسابي", icon: "users" }] : []),
+    ...(access.status === "expired" ? [...studentEntryNavigation, { href: "/login", label: "دخول المعلم", icon: "shield" }] : []),
     { action: "signOut", label: "تسجيل الخروج", icon: "logout" },
   ] });
-  else if (!["loading", "verifying"].includes(access.status)) groups.push({ id: "account", label: "المعلم", links: [{ href: "/login", label: "دخول المعلم", icon: "shield" }] });
+  else if (!["loading", "verifying"].includes(access.status)) groups.push({ id: "account", label: "الدخول", links: [...studentEntryNavigation, { href: "/login", label: "دخول المعلم", icon: "shield" }] });
   return groups;
 }
 export function isCurrentDestination(href, pathname) {

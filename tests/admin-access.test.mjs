@@ -115,7 +115,7 @@ test("frontend permission parsing treats expired, offline and malformed response
   assert.equal((await fetchAccountAccess("synthetic-token", { fetcher: async () => { throw new Error("offline"); } })).role, null);
 });
 const payloads = {
-  "grades.list": {}, "classrooms.list": {}, "classrooms.directory": {}, "students.list": {}, "content.list": {}, "quizzes.list": {}, "challenges.list": {}, "results.list": {},
+  "grades.list": {}, "classrooms.list": {}, "classrooms.directory": {}, "students.list": {}, "students.approvals": {}, "content.list": {}, "quizzes.list": {}, "challenges.list": {}, "results.list": {},
   "classrooms.create": { grade_id: 1, name: "A", is_active: true, sort_order: 1 },
   "classrooms.rename": { id: 1, name: "B" }, "classrooms.active": { id: 1, is_active: false },
   "students.create": { classroom_id: 1, student_name: "Synthetic", is_active: true },

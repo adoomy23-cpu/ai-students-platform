@@ -1,0 +1,23 @@
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAccess } from "../../../components/platform/AuthProvider";
+import { studentDestination } from "../../../lib/student/profile.mjs";
+import AccountPage from "../../../components/student/AccountPage";
+import StudentStatus from "../../../components/student/StudentStatus";
+import { ActionLink, Feedback } from "../../../components/platform/PlatformUI";
+export default function ConfirmAccountPage() {
+  const access = useAccess(); const router = useRouter();
+  const destination = studentDestination(access);
+  // Existing Supabase browser client uses its standard implicit email-link
+  // session detection. Never print, log or pass the URL's tokens to the UI.
+  useEffect(() => {
+    if (access.status === "authenticated" && destination) router.replace(destination);
+    else if (access.status === "authenticated") router.replace("/pending-approval");
+  }, [access.status, destination, router]);
+  return <AccountPage title="تأكيد البريد" description="نتحقق من جلسة حسابك بعد فتح رابط التأكيد." icon="shield">
+    <StudentStatus />
+    {access.status === "visitor" && <Feedback>إذا انتهى الرابط أو فُتح في جهاز آخر، سجّل دخولك بعد تأكيد البريد.</Feedback>}
+    <ActionLink href="/student-login" variant="secondary">العودة لدخول الطالب</ActionLink>
+  </AccountPage>;
+}

@@ -1,6 +1,6 @@
-export const initialAccess = Object.freeze({ status: "loading", role: null, canSignOut: false, signingOut: false, accountEpoch: 0, retainAdmin: false });
+export const initialAccess = Object.freeze({ status: "loading", role: null, canSignOut: false, signingOut: false, accountEpoch: 0, retainAdmin: false, retainStudent: false });
 
-// UI state contains no tokens or personal data. Authority always comes from
+// UI state contains no tokens or directory; only the verified student's own display profile. Authority always comes from
 // the server; local sessions only supply a credential for that verification.
 export function createAccessStore({ loadClient, verify, now = Date.now, schedule = setTimeout, unschedule = clearTimeout }) {
   let snapshot = initialAccess;
@@ -14,8 +14,9 @@ export function createAccessStore({ loadClient, verify, now = Date.now, schedule
   let controller = null;
   let accountEpoch = 0;
   let retainAdmin = false;
+  let retainStudent = false;
   const listeners = new Set();
-  const emit = (value) => { snapshot = Object.freeze({ ...value, accountEpoch, retainAdmin }); listeners.forEach((listener) => listener()); };
+  const emit = (value) => { snapshot = Object.freeze({ ...value, accountEpoch, retainAdmin, retainStudent }); listeners.forEach((listener) => listener()); };
   function invalidate() {
     revision += 1;
     controller?.abort();
@@ -26,11 +27,11 @@ export function createAccessStore({ loadClient, verify, now = Date.now, schedule
   }
   function acceptSession(next) {
     const version = invalidate();
-    if ((session?.user?.id || null) !== (next?.user?.id || null)) { accountEpoch += 1; retainAdmin = false; }
+    if ((session?.user?.id || null) !== (next?.user?.id || null)) { accountEpoch += 1; retainAdmin = false; retainStudent = false; }
     session = next;
-    if (!next?.access_token || !next?.user?.id) { retainAdmin = false; emit({ status: "visitor", role: "visitor", canSignOut: false, signingOut: false }); return; }
+    if (!next?.access_token || !next?.user?.id) { retainAdmin = false; retainStudent = false; emit({ status: "visitor", role: "visitor", canSignOut: false, signingOut: false }); return; }
     const expires = Number(next.expires_at) * 1000;
-    if (Number.isFinite(expires) && expires <= now()) { retainAdmin = false; emit({ status: "expired", role: null, canSignOut: true, signingOut: false }); return; }
+    if (Number.isFinite(expires) && expires <= now()) { retainAdmin = false; retainStudent = false; emit({ status: "expired", role: null, canSignOut: true, signingOut: false }); return; }
     emit({ status: "verifying", role: null, canSignOut: true, signingOut: false });
     const verificationController = new AbortController();
     controller = verificationController;
@@ -38,8 +39,8 @@ export function createAccessStore({ loadClient, verify, now = Date.now, schedule
     expiryTimer = schedule(() => { refresh(); }, Math.min(remaining, 60000));
     Promise.resolve().then(() => active && revision === version ? verify(next.access_token, { signal: verificationController.signal }) : null).then((result) => {
       if (!active || revision !== version) return;
-      if (result.status === "authenticated") retainAdmin = result.role === "admin";
-      if (["expired", "visitor"].includes(result.status)) retainAdmin = false;
+      if (result.status === "authenticated") { retainAdmin = result.role === "admin"; retainStudent = result.role === "student" && result.student?.state === "approved"; }
+      if (["expired", "visitor"].includes(result.status)) { retainAdmin = false; retainStudent = false; }
       emit({ ...result, canSignOut: true, signingOut: false });
     }).catch(() => {
       if (active && revision === version) emit({ status: "error", role: null, canSignOut: true, signingOut: false });
@@ -79,12 +80,12 @@ export function createAccessStore({ loadClient, verify, now = Date.now, schedule
     }).catch(() => {
       if (active && life === generation) emit({ status: "error", role: null, canSignOut: Boolean(session), signingOut: false });
     });
-    return () => { active = false; life += 1; invalidate(); subscription?.unsubscribe(); subscription = null; snapshot = initialAccess; retainAdmin = false; accountEpoch += 1; client = null; session = null; };
+    return () => { active = false; life += 1; invalidate(); subscription?.unsubscribe(); subscription = null; snapshot = initialAccess; retainAdmin = false; retainStudent = false; accountEpoch += 1; client = null; session = null; };
   }
   async function signOut() {
     if (!client || snapshot.signingOut) return;
     const version = invalidate();
-    retainAdmin = false;
+    retainAdmin = false; retainStudent = false;
     emit({ status: "verifying", role: null, canSignOut: Boolean(session), signingOut: true });
     try {
       const { error } = await client.auth.signOut({ scope: "local" });

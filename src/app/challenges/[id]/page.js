@@ -1,65 +1,30 @@
 "use client";
 
 import SchoolIcon from "../../../components/brand/SchoolIcon";
-import { EmptyState, Button, Card, Feedback, Input, PageSurface, Select, Textarea } from "../../../components/platform/PlatformUI";
+import { EmptyState, Button, Card, Feedback, Input, PageSurface, Textarea } from "../../../components/platform/PlatformUI";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { useAccess } from "../../../components/platform/AuthProvider";
+import StudentIdentity from "../../../components/student/StudentIdentity";
+import { requestStudent, uploadStudentFile } from "../../../lib/student/browser-client";
 
 async function requestPage(challengeId) {
-  const [
-        challengeResult,
-        gradesResult,
-        classroomsResult,
-        studentsResult,
-      ] = await Promise.all([
-        supabase
-          .from("challenges")
-          .select("*")
-          .eq("id", challengeId)
-          .eq("status", "published")
-          .single(),
-
-        supabase
-          .from("grades")
-          .select("*")
-          .order("id"),
-
-        supabase
-          .from("classrooms")
-          .select("*")
-          .order("id"),
-
-        supabase
-          .from("students")
-          .select("*")
-          .eq("is_active", true)
-          .order("student_name"),
-      ]);
-  return { challengeResult, gradesResult, classroomsResult, studentsResult };
+  return { challengeResult: await requestStudent("challenge.load", { id: challengeId }) };
 }
 
 export default function ChallengeDetailsPage() {
+  const access = useAccess();
+  const studentId = access.student?.profile?.id;
   const params = useParams();
   const challengeId = Number(params?.id);
 
   const [challenge, setChallenge] = useState(null);
   const [loadedChallengeId, setLoadedChallengeId] = useState(null);
-  const [grades, setGrades] = useState([]);
-  const [classrooms, setClassrooms] = useState([]);
-  const [students, setStudents] = useState([]);
-
-  const [gradeId, setGradeId] = useState("");
-  const [classroomId, setClassroomId] = useState("");
-  const [studentId, setStudentId] = useState("");
-
   const [submissionText, setSubmissionText] = useState("");
 
   const [imageFile, setImageFile] = useState(null);
   const [fileFile, setFileFile] = useState(null);
-const [imageUrl, setImageUrl] = useState("");
-  const [fileUrl, setFileUrl] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -70,7 +35,7 @@ const [imageUrl, setImageUrl] = useState("");
     let active = true;
 
     requestPage(challengeId)
-      .then(({ challengeResult, gradesResult, classroomsResult, studentsResult }) => {
+      .then(({ challengeResult }) => {
       if (!active) return;
       setLoadedChallengeId(challengeId);
       setMessage("");
@@ -80,10 +45,6 @@ const [imageUrl, setImageUrl] = useState("");
       } else {
         setChallenge(challengeResult.data);
       }
-
-      setGrades(gradesResult.data || []);
-      setClassrooms(classroomsResult.data || []);
-      setStudents(studentsResult.data || []);
 
       setLoading(false);
       })
@@ -97,28 +58,12 @@ const [imageUrl, setImageUrl] = useState("");
     return () => { active = false; };
   }, [challengeId]);
 
-  const filteredClassrooms = useMemo(() => {
-    if (!gradeId) return [];
-
-    return classrooms.filter(
-      (item) => Number(item.grade_id) === Number(gradeId)
-    );
-  }, [classrooms, gradeId]);
-
-  const filteredStudents = useMemo(() => {
-    if (!classroomId) return [];
-
-    return students.filter(
-      (item) =>
-        Number(item.classroom_id) === Number(classroomId)
-    );
-  }, [students, classroomId]);
-
   async function submitChallenge(e) {
     e.preventDefault();
 
+    if (sending) return;
     if (!studentId) {
-      setMessage("اختر اسم الطالب أولًا.");
+      setMessage("تعذر التحقق من هوية حسابك. أعد تسجيل الدخول.");
       return;
     }
 
@@ -139,66 +84,33 @@ const [imageUrl, setImageUrl] = useState("");
     let uploadedFilePath = null;
 
     try {
-      const basePath = `challenges/${challengeId}/${studentId}`;
-
       if (challenge?.allow_image && imageFile) {
-        const ext = imageFile.name.split(".").pop() || "jpg";
-        const imagePath = `${basePath}/${Date.now()}-image.${ext}`;
-
-        const { error: imageUploadError } = await supabase.storage
-          .from("student-private")
-          .upload(imagePath, imageFile, {
-            cacheControl: "3600",
-            upsert: false,
-          });
-
-        if (imageUploadError) throw imageUploadError;
-        uploadedImagePath = imagePath;
+        const upload = await uploadStudentFile(challengeId, "image", imageFile);
+        if (upload.error || !upload.data?.path) throw new Error("upload");
+        uploadedImagePath = upload.data.path;
       }
-
       if (challenge?.allow_file && fileFile) {
-        const safeName = fileFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        const filePath = `${basePath}/${Date.now()}-${safeName}`;
-
-        const { error: fileUploadError } = await supabase.storage
-          .from("student-private")
-          .upload(filePath, fileFile, {
-            cacheControl: "3600",
-            upsert: false,
-          });
-
-        if (fileUploadError) throw fileUploadError;
-        uploadedFilePath = filePath;
+        const upload = await uploadStudentFile(challengeId, "file", fileFile);
+        if (upload.error || !upload.data?.path) throw new Error("upload");
+        uploadedFilePath = upload.data.path;
       }
-    } catch (uploadError) {
-      setMessage("تعذر رفع الملف: " + uploadError.message);
+    } catch {
+      setMessage("تعذر رفع الملف. تحقق من نوعه وحجمه (حتى 10 ميجابايت) ثم حاول مجددًا.");
       setSending(false);
       return;
     }
-
-    const payload = {
-      challenge_id: challengeId,
-      student_id: Number(studentId),
-      submission_text:
-        challenge?.allow_text && submissionText.trim()
-          ? submissionText.trim()
-          : null,
-      image_url: uploadedImagePath,
-      file_url: uploadedFilePath,
-      status: "submitted",
-    };
-
-    const { error } = await supabase
-      .from("challenge_submissions")
-      .insert(payload);
+    const { error } = await requestStudent("challenge.submit", {
+      id: challengeId,
+      text: challenge?.allow_text && submissionText.trim() ? submissionText.trim() : null,
+      imagePath: uploadedImagePath,
+      filePath: uploadedFilePath,
+    });
 
     if (error) {
-      setMessage("تعذر إرسال المشاركة: " + error.message);
+      setMessage("تعذر إرسال المشاركة. تحقق من حالة حسابك ثم حاول مجددًا.");
     } else {
       setMessage("تم إرسال مشاركتك بنجاح");
       setSubmissionText("");
-      setImageUrl("");
-      setFileUrl("");
       setImageFile(null);
       setFileFile(null);
     }
@@ -283,91 +195,8 @@ const [imageUrl, setImageUrl] = useState("");
           onSubmit={submitChallenge}
           style={styles.card}
         >
-          <h2 style={styles.cardTitle}>
-            <SchoolIcon name="teacher" size={22} /> عرّف بنفسك أولًا
-          </h2>
-
-          <div className="platform-grid" style={styles.grid}>
-            <div>
-              <label htmlFor="field-challengesid-1" style={styles.label}>
-                الصف الدراسي
-              </label>
-
-              <Select id="field-challengesid-1"
-                value={gradeId}
-                onChange={(e) => {
-                  setGradeId(e.target.value);
-                  setClassroomId("");
-                  setStudentId("");
-                }}
-                style={styles.input}
-              >
-                <option value="">اختر الصف</option>
-
-                {grades.map((grade) => (
-                  <option
-                    key={grade.id}
-                    value={grade.id}
-                  >
-                    {grade.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div>
-              <label htmlFor="field-challengesid-2" style={styles.label}>
-                الفصل
-              </label>
-
-              <Select id="field-challengesid-2"
-                value={classroomId}
-                onChange={(e) => {
-                  setClassroomId(e.target.value);
-                  setStudentId("");
-                }}
-                style={styles.input}
-                disabled={!gradeId}
-              >
-                <option value="">اختر الفصل</option>
-
-                {filteredClassrooms.map((room) => (
-                  <option
-                    key={room.id}
-                    value={room.id}
-                  >
-                    {room.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div>
-              <label htmlFor="field-challengesid-3" style={styles.label}>
-                اسم الطالب
-              </label>
-
-              <Select id="field-challengesid-3"
-                value={studentId}
-                onChange={(e) =>
-                  setStudentId(e.target.value)
-                }
-                style={styles.input}
-                disabled={!classroomId}
-              >
-                <option value="">اختر اسمك</option>
-
-                {filteredStudents.map((student) => (
-                  <option
-                    key={student.id}
-                    value={student.id}
-                  >
-                    {student.student_name}
-                  </option>
-                ))}
-              </Select>
-            </div>
-          </div>
+          <h2 style={styles.cardTitle}>المشاركة باسم حسابك</h2>
+          <StudentIdentity />
 
           <h2 style={styles.participationTitle}>
             <SchoolIcon name="rocket" size={22} /> أرسل مشاركتك
@@ -398,7 +227,7 @@ const [imageUrl, setImageUrl] = useState("");
 
               <Input id="field-challengesid-5"
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp,image/gif"
                 onChange={(e) =>
                   setImageFile(e.target.files?.[0] || null)
                 }
@@ -407,6 +236,8 @@ const [imageUrl, setImageUrl] = useState("");
             </div>
           )}
 
+          <p className="student-upload-note">الحد الأقصى لكل ملف 10 ميجابايت. الصور: JPG وPNG وWEBP وGIF. الملفات: PDF والنصوص ومستندات Office وZIP وScratch.</p>
+
           {challenge.allow_file && (
             <div>
               <label htmlFor="field-challengesid-6" style={styles.label}>
@@ -414,7 +245,7 @@ const [imageUrl, setImageUrl] = useState("");
               </label>
 
               <Input id="field-challengesid-6"
-                type="file"
+                type="file" accept=".pdf,.txt,.doc,.docx,.ppt,.pptx,.xlsx,.zip,.sb3"
                 onChange={(e) =>
                   setFileFile(e.target.files?.[0] || null)
                 }

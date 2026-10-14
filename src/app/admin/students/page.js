@@ -1,5 +1,7 @@
 "use client";
 
+import ApprovalRequests from "../../../components/student/ApprovalRequests";
+
 import { useDialogs } from "../../../components/platform/DialogProvider";
 
 import { Button, Card, EmptyState, Feedback, Input, PageSurface, Select, StatusBadge } from "../../../components/platform/PlatformUI";
@@ -235,6 +237,8 @@ export default function StudentsPage() {
 
 
         </div>
+
+        <ApprovalRequests />
 
         <Card as="section" style={styles.card}>
           <h2 style={styles.cardTitle}>إضافة طالب جديد</h2>
