@@ -1,81 +1,134 @@
-import { createElement as h } from "react";
 import Link from "next/link";
 import { platformIdentity, learningPaths } from "../config/platform.mjs";
-import Icon from "../components/ui/Icon";
+import SchoolBrand from "../components/brand/SchoolBrand";
+import SchoolIcon from "../components/brand/SchoolIcon";
+import MobileNavigation from "../components/brand/MobileNavigation";
 import RobotIllustration from "../components/home/RobotIllustration";
 import PublishedQuizzes from "../components/home/PublishedQuizzes";
 
-function Brand() {
-  return h(Link, { href: "/", className: "ph-brand", "aria-label": "منصة الذكاء الاصطناعي، الرئيسية" },
-    h("span", { className: "ph-brand-symbol", "aria-hidden": "true" }, h(Icon, { name: "spark" })),
-    h("span", null, h("strong", null, platformIdentity.name), h("small", { lang: "en", dir: "ltr" }, platformIdentity.shortName)));
+function SectionTitle({ eyebrow, title, text, id }) {
+  return (
+    <div className="school-section-title">
+      <span className="school-eyebrow">{eyebrow}</span>
+      <h2 id={id}>{title}</h2>
+      {text && <p>{text}</p>}
+    </div>
+  );
 }
-function NavLinks() {
-  return [
-    h("a", { key: "home", href: "#home", "aria-current": "page" }, "الرئيسية"),
-    h("a", { key: "explore", href: "#explore" }, "تعلّم واستكشف"),
-    h(Link, { key: "challenges", href: "/challenges" }, "التحديات"),
-    h("a", { key: "quizzes", href: "#quizzes" }, "الاختبارات"),
-    h("a", { key: "honor", href: "#honor" }, "لوحة الشرف"),
-  ];
-}
-function SectionHeading({ eyebrow, title, text, id }) {
-  return h("div", { className: "ph-section-heading" },
-    h("span", { className: "ph-eyebrow" }, eyebrow), h("h2", { id }, title), h("p", null, text));
-}
+
 export default function Home() {
-  return h("div", { className: "platform-home" },
-    h("a", { className: "ph-skip", href: "#main-content" }, "انتقل إلى المحتوى"),
-    h("div", { className: "ph-topline" }, h(Icon, { name: "spark" }), "مساحة للتعلّم والإبداع من الصف الأول إلى السادس"),
-    h("header", { className: "ph-header" }, h("div", { className: "ph-container ph-header-inner" },
-      h(Brand), h("nav", { className: "ph-desktop-nav", "aria-label": "التنقل الرئيسي" }, h(NavLinks)),
-      h(Link, { href: "/login", className: "ph-button ph-button-navy ph-teacher-link" }, "دخول المعلم", h(Icon, { name: "arrow" })),
-      h("details", { className: "ph-mobile-nav" },
-        h("summary", { "aria-label": "قائمة التنقل" }, h(Icon, { name: "menu" }), h("span", null, "القائمة")),
-        h("nav", { "aria-label": "التنقل على الجوال" }, h(NavLinks), h(Link, { href: "/login" }, "دخول المعلم"))))),
-    h("main", { id: "main-content" },
-      h("section", { id: "home", className: "ph-hero ph-container", "aria-labelledby": "hero-title" },
-        h("div", { className: "ph-hero-copy" },
-          h("span", { className: "ph-pill" }, h("span", { className: "ph-dot" }), "أفكار صغيرة. مستقبل كبير."),
-          h("h1", { id: "hero-title" }, "فضولك اليوم،", h("br"), h("span", null, "إبداعك غدًا.")),
-          h("p", { className: "ph-hero-description" }, "اكتشف عالم الذكاء الاصطناعي بطريقة ممتعة. تعلّم، جرّب، وتحدَّ نفسك… فكل فكرة مميزة تبدأ بسؤال!"),
-          h("div", { className: "ph-hero-actions" },
-            h("a", { href: "#explore", className: "ph-button ph-button-blue" }, "ابدأ رحلة التعلّم", h(Icon, { name: "arrow" })),
-            h(Link, { href: "/challenges", className: "ph-button ph-button-outline" }, h(Icon, { name: "rocket" }), "استكشف التحديات")),
-          h("div", { className: "ph-hero-note" }, h(Icon, { name: "shield" }), "نتعلّم التقنية بوعي، ونستخدمها بإبداع")),
-        h("div", { className: "ph-hero-art" }, h(RobotIllustration),
-          h("div", { className: "ph-float ph-float-top" }, h("span", { className: "ph-icon-tile ph-tone-orange" }, h(Icon, { name: "rocket" })), h("div", null, h("strong", null, "كل فكرة تستحق التجربة"), h("small", null, "أطلق خيالك"))),
-          h("div", { className: "ph-float ph-float-bottom" }, h("span", { className: "ph-icon-tile ph-tone-blue" }, h(Icon, { name: "spark" })), h("div", null, h("strong", null, "أنت بطل رحلتك"), h("small", null, "تعلّم بطريقتك"))))),
-      h("section", { className: "ph-values ph-container", "aria-label": "رحلتك في المنصة" },
-        ...[{ icon: "book", title: "تعلّم ببساطة", text: "دروس وأفكار قريبة من عالمك" }, { icon: "rocket", title: "جرّب بشجاعة", text: "تحديات تفتح باب الإبداع" }, { icon: "trophy", title: "احتفل بتقدّمك", text: "كل خطوة إنجاز يستحق الفخر" }].map((item) =>
-          h("div", { className: "ph-value", key: item.title }, h(Icon, { name: item.icon }), h("div", null, h("strong", null, item.title), h("span", null, item.text))))),
-      h("section", { id: "explore", className: "ph-section ph-container", "aria-labelledby": "explore-title" },
-        h(SectionHeading, { eyebrow: "عالم من الاكتشاف", title: "ماذا تريد أن تجرّب اليوم؟", text: "اختر بداية رحلتك، واترك فضولك يقودك إلى شيء جديد.", id: "explore-title" }),
-        h("div", { className: "ph-path-grid" }, ...learningPaths.map((path, index) =>
-          h("article", { className: "ph-path-card ph-path-" + path.tone, key: path.title },
-            h("div", { className: "ph-card-top" }, h("span", { className: "ph-icon-tile ph-tone-" + path.tone }, h(Icon, { name: path.icon })), h("span", { className: "ph-card-index", "aria-hidden": "true" }, "0" + (index + 1))),
-            h("h3", null, path.title), h("p", null, path.text),
-            h(Link, { href: path.href, className: "ph-text-link" }, path.label, h(Icon, { name: "arrow" }))))),
-        h("div", { className: "ph-learning-note" }, h(Icon, { name: "play" }), h("p", null, "تحب التعلّم بالمشاهدة؟ ", h(Link, { href: "/content" }, "استكشف الفيديوهات والمحتوى التعليمي")))),
-      h("section", { id: "quizzes", className: "ph-quizzes-section", "aria-labelledby": "quizzes-title" }, h("div", { className: "ph-container" },
-        h(SectionHeading, { eyebrow: "خطوة جديدة في رحلتك", title: "جاهز لتحدّي معلوماتك؟", text: "اختبارات منشورة تساعدك على اكتشاف ما تعلّمته.", id: "quizzes-title" }), h(PublishedQuizzes))),
-      h("section", { className: "ph-section ph-container ph-community", "aria-label": "أعمال الطلاب ولوحة الشرف" },
-        h("article", { id: "student-work", className: "ph-work-card" },
-          h("span", { className: "ph-eyebrow" }, "أفكار تصنع الفرق"), h("h2", null, "مساحة لإبداعك"),
-          h("p", null, "ارسم، اكتب، وابتكر. يمكنك إرسال عملك من داخل التحديات المتاحة."),
-          h(Link, { href: "/challenges", className: "ph-text-link" }, "شارك في تحدٍّ", h(Icon, { name: "arrow" })),
-          h("div", { className: "ph-work-illustration", "aria-hidden": "true" }, h(Icon, { name: "pencil" }), h(Icon, { name: "spark" }))),
-        h("article", { id: "honor", className: "ph-honor-card" },
-          h("span", { className: "ph-eyebrow" }, "نجوم المنصة"), h("h2", null, "كل إبداع يستحق التقدير"),
-          h("p", null, "مساحة مخصصة للاحتفاء بالأعمال المميزة. عرض أعمال الطلاب المعتمدة سيُتاح في مرحلة قادمة."),
-          h("span", { className: "ph-coming-soon" }, "لوحة الشرف قريبًا"), h(Icon, { name: "trophy", className: "ph-honor-trophy" }))),
-      h("section", { className: "ph-teacher-section ph-container", "aria-labelledby": "teacher-title" },
-        h("span", { className: "ph-icon-tile ph-tone-blue" }, h(Icon, { name: "book" })),
-        h("div", null, h("h2", { id: "teacher-title" }, "للمعلم… مساحة تقود فيها الإبداع"), h("p", null, "تابع محتوى المنصة والاختبارات ونتائج الطلاب من لوحة الإدارة.")),
-        h(Link, { href: "/login", className: "ph-button ph-button-navy" }, "دخول المعلم", h(Icon, { name: "arrow" })))),
-    h("footer", { className: "ph-footer" }, h("div", { className: "ph-container ph-footer-inner" },
-      h("div", null, h(Brand), h("p", null, platformIdentity.tagline)),
-      h("nav", { "aria-label": "روابط التذييل" }, h(Link, { href: "/content" }, "المحتوى التعليمي"), h(Link, { href: "/challenges" }, "التحديات"), h(Link, { href: "/login" }, "دخول المعلم")),
-      h("small", null, "منصة تعليمية لصناعة جيل يتعلّم التقنية بوعي وإبداع"))));
+  return (
+    <div className="school-home">
+      <a className="school-skip" href="#main-content">انتقل إلى المحتوى</a>
+      <header className="school-header">
+        <div className="school-container school-header-inner">
+          <SchoolBrand />
+          <nav className="school-desktop-navigation" aria-label="التنقل الرئيسي">
+            <Link href="#home" aria-current="page">الرئيسية</Link>
+            <Link href="#explore">رحلة التعلّم</Link>
+            <Link href="/challenges">التحديات</Link>
+            <Link href="#quizzes">الاختبارات</Link>
+            <Link href="#honor">لوحة الشرف</Link>
+          </nav>
+          <Link href="/login" className="school-button school-button-dark school-header-login"><SchoolIcon name="teacher" size={19} />دخول المعلم</Link>
+          <MobileNavigation />
+        </div>
+      </header>
+
+      <main id="main-content">
+        <section id="home" className="school-hero school-container" aria-labelledby="hero-title">
+          <div className="school-hero-copy">
+            <span className="school-pill"><span className="school-live-dot" />جيل يتعلّم بفضول، ويبتكر بثقة</span>
+            <h1 id="hero-title">فكرة اليوم.<br /><span>إبداع الغد.</span></h1>
+            <p className="school-hero-description">عالم الذكاء الاصطناعي أقرب مما تتخيّل. اكتشف، جرّب، وحوّل أسئلتك الصغيرة إلى أفكار تستحق أن تُروى.</p>
+            <div className="school-hero-actions">
+              <Link href="#explore" className="school-button school-button-gold">ابدأ رحلة التعلّم<SchoolIcon name="arrow" size={20} /></Link>
+              <Link href="/challenges" className="school-button school-button-outline"><SchoolIcon name="rocket" size={20} />استكشف التحديات</Link>
+            </div>
+            <div className="school-hero-meta">
+              <span><SchoolIcon name="teacher" size={18} />للصفوف الأول إلى السادس</span>
+              <span><SchoolIcon name="shield" size={18} />نتعلّم التقنية بوعي</span>
+            </div>
+          </div>
+
+          <div className="school-hero-stage">
+            <div className="school-stage-heading"><span><SchoolIcon name="spark" size={18} />مختبر الأفكار</span><span className="school-stage-marker" aria-hidden="true">AI / 01</span></div>
+            <RobotIllustration />
+            <div className="school-stage-stamp" aria-hidden="true"><SchoolIcon name="spark" size={20} /><span>اسأل.<br />جرّب.<br />ابتكر.</span></div>
+            <div className="school-stage-caption"><span className="school-caption-line" /><span>كل تجربة تبدأ بسؤال</span><SchoolIcon name="compass" size={18} /></div>
+          </div>
+        </section>
+
+        <section className="school-principles school-container" aria-label="خطوات رحلتك">
+          <div><SchoolIcon name="book" /><span><strong>تعلّم ببساطة</strong><small>أفكار واضحة، وخطوات صغيرة</small></span></div>
+          <div><SchoolIcon name="rocket" /><span><strong>جرّب بشجاعة</strong><small>مساحة لأفكارك وتجاربك</small></span></div>
+          <div><SchoolIcon name="trophy" /><span><strong>احتفل بتقدّمك</strong><small>كل محاولة خطوة إلى الأمام</small></span></div>
+        </section>
+
+        <section id="explore" className="school-section school-container" aria-labelledby="explore-title">
+          <div className="school-section-heading-row">
+            <SectionTitle eyebrow="رحلتك، بطريقتك" title="ماذا ستكتشف اليوم؟" text="ثلاث بدايات مختلفة. وفضول واحد يقودك إلى الأمام." id="explore-title" />
+            <span className="school-section-note"><span />اختر ما يثير فضولك</span>
+          </div>
+          <div className="school-path-grid">
+            {learningPaths.map((item, index) => (
+              <article className={"school-path-card school-path-" + item.tone} key={item.title}>
+                <div className="school-card-top"><span className={"school-icon-tile school-tone-" + item.tone}><SchoolIcon name={item.icon} size={27} /></span><span className="school-card-number" aria-hidden="true">{["٠١", "٠٢", "٠٣"][index]}</span></div>
+                <h3>{item.title}</h3>
+                <p>{item.text}</p>
+                <Link href={item.href} className="school-card-link"><span>{item.label}</span><span className="school-arrow-circle"><SchoolIcon name="arrow" size={18} /></span></Link>
+              </article>
+            ))}
+          </div>
+          <Link href="/content" className="school-video-strip"><span className="school-video-icon"><SchoolIcon name="play" size={22} /></span><span><strong>فكرة جديدة، في فيديو قصير</strong><small>استكشف الفيديوهات والمحتوى التعليمي</small></span><SchoolIcon name="arrow" size={19} /></Link>
+        </section>
+
+        <section id="quizzes" className="school-quizzes-section" aria-labelledby="quizzes-title">
+          <div className="school-container">
+            <div className="school-section-heading-row"><SectionTitle eyebrow="من الفهم إلى التجربة" title="جاهز لتحدّي معلوماتك؟" text="اختباراتك المنشورة، في مكان واحد." id="quizzes-title" /><span className="school-section-emblem" aria-hidden="true"><SchoolIcon name="check" size={26} /></span></div>
+            <PublishedQuizzes />
+          </div>
+        </section>
+
+        <section className="school-section school-container school-community" aria-label="أعمال الطلاب ولوحة الشرف">
+          <article id="student-work" className="school-work-card">
+            <span className="school-eyebrow">أفكار تستحق المشاركة</span>
+            <h2>اترك بصمتك.</h2>
+            <p>رسم، قصة، أو فكرة مختلفة. شارك إبداعك من داخل التحديات المتاحة.</p>
+            <Link href="/challenges" className="school-text-link">شارك في تحدٍّ<SchoolIcon name="arrow" size={18} /></Link>
+            <div className="school-work-art" aria-hidden="true"><span /><SchoolIcon name="pencil" size={68} /><SchoolIcon name="spark" size={25} /></div>
+          </article>
+          <article id="honor" className="school-honor-card">
+            <span className="school-eyebrow">نحتفي بالمحاولة والإبداع</span>
+            <h2>هنا، يلمع كل مجتهد.</h2>
+            <p>قريبًا، مساحة نحتفي فيها بأعمال الطلاب المميزة بعد اعتمادها.</p>
+            <span className="school-coming-soon"><span />لوحة الشرف قريبًا</span>
+            <div className="school-honor-art" aria-hidden="true"><SchoolIcon name="trophy" size={82} /><span /></div>
+          </article>
+        </section>
+
+        <section className="school-teacher-panel school-container" aria-labelledby="teacher-title">
+          <span className="school-icon-tile school-tone-stone"><SchoolIcon name="teacher" size={27} /></span>
+          <div><h2 id="teacher-title">وراء كل فكرة، معلّم يلهم.</h2><p>تابع المحتوى والاختبارات ونتائج الطلاب من لوحة الإدارة.</p></div>
+          <Link href="/login" className="school-button school-button-outline">دخول المعلم<SchoolIcon name="arrow" size={18} /></Link>
+        </section>
+      </main>
+
+      <footer className="school-footer">
+        <div className="school-container school-footer-main">
+          <SchoolBrand compact />
+          <nav aria-label="روابط التذييل"><Link href="/content">المحتوى التعليمي</Link><Link href="/challenges">التحديات</Link><Link href="/login">دخول المعلم</Link></nav>
+        </div>
+        <div className="school-container school-footer-bottom"><span>{platformIdentity.schoolName}</span><span>منصة تعليمية للذكاء الاصطناعي · نتعلّم التقنية بوعي وإبداع</span></div>
+      </footer>
+
+      <nav className="school-mobile-dock" aria-label="التنقل السريع على الجوال">
+        <Link href="#home" aria-current="page"><SchoolIcon name="compass" size={21} /><span>الرئيسية</span></Link>
+        <Link href="/content"><SchoolIcon name="book" size={21} /><span>تعلّم</span></Link>
+        <Link href="/challenges"><SchoolIcon name="rocket" size={21} /><span>التحديات</span></Link>
+        <Link href="#quizzes"><SchoolIcon name="check" size={21} /><span>الاختبارات</span></Link>
+      </nav>
+    </div>
+  );
 }
 

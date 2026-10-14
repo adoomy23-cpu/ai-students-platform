@@ -2,7 +2,7 @@
 import { createElement as h, useEffect, useState } from "react";
 import Link from "next/link";
 import { readPublishedQuizzes } from "../../lib/published-quizzes.mjs";
-import Icon from "../ui/Icon";
+import Icon from "../brand/SchoolIcon";
 
 async function requestPublishedQuizzes() {
   const { supabase } = await import("../../lib/supabase");
@@ -22,12 +22,12 @@ export default function PublishedQuizzes() {
     return () => { active = false; };
   }, [configured, retry]);
   if (state.status === "ready") {
-    return h("div", { className: "ph-quiz-grid" }, ...state.quizzes.map((quiz) =>
-      h("article", { className: "ph-quiz-card", key: quiz.id },
-        h("span", { className: "ph-icon-tile ph-tone-blue" }, h(Icon, { name: "check" })),
-        h("span", { className: "ph-tag" }, "اختبار منشور"), h("h3", null, quiz.title),
+    return h("div", { className: "school-quiz-grid" }, ...state.quizzes.map((quiz) =>
+      h("article", { className: "school-quiz-card", key: quiz.id },
+        h("span", { className: "school-icon-tile school-tone-gold" }, h(Icon, { name: "check" })),
+        h("span", { className: "school-status-tag" }, "اختبار منشور"), h("h3", null, quiz.title),
         h("p", null, "اقرأ الأسئلة بهدوء، واجعل كل محاولة فرصة للتعلّم."),
-        h(Link, { href: `/quiz/${quiz.id}`, className: "ph-text-link" }, "ابدأ الاختبار", h(Icon, { name: "arrow" })))));
+        h(Link, { href: `/quiz/${quiz.id}`, className: "school-text-link" }, "ابدأ الاختبار", h(Icon, { name: "arrow" })))));
   }
   const messages = {
     loading: ["نجهّز اختباراتك", "لحظات قليلة لعرض الاختبارات المتاحة."],
@@ -36,9 +36,9 @@ export default function PublishedQuizzes() {
     error: ["تعذّر تحميل الاختبارات", "حاول مرة أخرى بعد قليل، أو تابع استكشاف المحتوى."],
   };
   const [title, text] = messages[state.status];
-  return h("div", { className: "ph-empty", role: "status", "aria-live": "polite", "aria-busy": state.status === "loading" },
-    h("span", { className: "ph-icon-tile ph-tone-blue" }, h(Icon, { name: "spark" })),
+  return h("div", { className: "school-empty", role: "status", "aria-live": "polite", "aria-busy": state.status === "loading" },
+    h("span", { className: "school-icon-tile school-tone-gold" }, h(Icon, { name: "spark" })),
     h("div", null, h("h3", null, title), h("p", null, text)),
-    state.status === "error" ? h("button", { className: "ph-button ph-button-outline", type: "button", onClick: () => { setState({ status: "loading", quizzes: [] }); setRetry((value) => value + 1); } }, "إعادة المحاولة")
-      : h(Link, { href: "/content", className: "ph-text-link" }, "استكشف المحتوى", h(Icon, { name: "arrow" })));
+    state.status === "error" ? h("button", { className: "school-button school-button-outline", type: "button", onClick: () => { setState({ status: "loading", quizzes: [] }); setRetry((value) => value + 1); } }, "إعادة المحاولة")
+      : h(Link, { href: "/content", className: "school-text-link" }, "استكشف المحتوى", h(Icon, { name: "arrow" })));
 }

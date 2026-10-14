@@ -1,0 +1,32 @@
+@font-face { font-family:"Alfikr Sans"; src:url("/fonts/IBMPlexSansArabic-Regular.woff2") format("woff2"); font-weight:400; font-style:normal; font-display:swap; }
+@font-face { font-family:"Alfikr Sans"; src:url("/fonts/IBMPlexSansArabic-Medium.woff2") format("woff2"); font-weight:500; font-style:normal; font-display:swap; }
+@font-face { font-family:"Alfikr Sans"; src:url("/fonts/IBMPlexSansArabic-SemiBold.woff2") format("woff2"); font-weight:600; font-style:normal; font-display:swap; }
+@font-face { font-family:"Alfikr Sans"; src:url("/fonts/IBMPlexSansArabic-Bold.woff2") format("woff2"); font-weight:700; font-style:normal; font-display:swap; }
+
+/* Scoped to the approved homepage. Existing routes keep their current appearance. */
+.school-home {
+  --brand-gold:#e5b822;
+  --brand-copper:#ab5e27;
+  --brand-grey:#8a8d91;
+  --ink:#171717;
+  --ink-soft:#3f3b36;
+  --muted:#65615a;
+  --copper-ink:#87451d;
+  --surface:#ffffff;
+  --canvas:#fffdf7;
+  --surface-soft:#f5f2e9;
+  --gold-soft:#f8efcf;
+  --copper-soft:#f6eadf;
+  --stone-soft:#eeedeb;
+  --line:#e5dfd3;
+  --success:#2e6a4f;
+  --success-soft:#edf5ef;
+  --warning:#8a5b0c;
+  --danger:#a8332d;
+  --danger-soft:#fbedeb;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+  --space-6:24px; --space-8:32px; --space-12:48px; --space-16:64px;
+  --radius-sm:10px; --radius-md:16px; --radius-lg:24px;
+  --shadow-sm:0 3px 12px rgb(35 29 16 / 4%);
+  --font-body:"Alfikr Sans",Tahoma,Arial,sans-serif;
+}

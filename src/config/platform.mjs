@@ -2,10 +2,11 @@
 export const platformIdentity = Object.freeze({
   name: "منصة الذكاء الاصطناعي",
   shortName: "AI Students",
-  tagline: "نتعلّم اليوم، ونبتكر الغد",
+  schoolName: "مدارس الفكر التربوية",
+  tagline: "نتعلّم. نجرّب. نبتكر.",
 });
 export const learningPaths = Object.freeze([
-  { icon: "book", title: "تعلّم واستكشف", text: "أفكار كبيرة، بخطوات صغيرة. اكتشف الدروس والفيديوهات والأنشطة التعليمية.", href: "/content", label: "استكشف المحتوى", tone: "blue" },
-  { icon: "rocket", title: "تحدَّ نفسك", text: "حوّل فكرتك إلى إبداع، وشارك في تحديات الذكاء الاصطناعي.", href: "/challenges", label: "شاهد التحديات", tone: "orange" },
-  { icon: "spark", title: "اختبر ما تعلّمت", text: "كل سؤال فرصة جديدة للتعلّم. اكتشف الاختبارات المنشورة أدناه.", href: "#quizzes", label: "استكشف الاختبارات", tone: "navy" },
+  { icon: "book", title: "تعلّم واستكشف", text: "دروس وفيديوهات تقرّب إليك الأفكار الكبيرة، بخطوات بسيطة.", href: "/content", label: "استكشف المحتوى", tone: "gold" },
+  { icon: "rocket", title: "جرّب فكرتك", text: "تحديات تفتح باب الخيال. حوّل ما تعلّمته إلى عمل من إبداعك.", href: "/challenges", label: "شاهد التحديات", tone: "copper" },
+  { icon: "spark", title: "اختبر معرفتك", text: "أسئلة تساعدك على اكتشاف ما تعلّمته. كل محاولة بداية جديدة.", href: "#quizzes", label: "استكشف الاختبارات", tone: "stone" },
 ]);
