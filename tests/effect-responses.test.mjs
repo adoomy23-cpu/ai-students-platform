@@ -11,7 +11,7 @@ const pages = [
   "admin/students/page.js", "challenges/page.js", "challenges/[id]/page.js",
   "challenges/[id]/page.before-upload.js", "content/page.js", "quiz/[id]/page.js",
   "quiz/[id]/page.before-result-page.js", "quiz/[id]/page.before-student.js",
-  "quiz/[id]/page.working.js",
+  "quiz/[id]/page.working.js", "q/page.js",
 ];
 
 async function checkLifecycle(page, scenario) {
@@ -34,7 +34,7 @@ async function checkLifecycle(page, scenario) {
     get: (_, name) => name === "then" ? response.then.bind(response) : () => query,
   });
   const context = vm.createContext({
-    console: { error() {} }, Promise, Number, String, Boolean,
+    console: { error() {} }, Promise, Number, String, Boolean, AbortController,
     supabase: { from: () => query, rpc: () => query },
     requestAdmin: () => response,
     requestStudent: () => response,

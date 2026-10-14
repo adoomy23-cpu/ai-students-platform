@@ -4,7 +4,7 @@ export const enrollmentContract = Object.freeze({ verified: false });
 const positiveId = (value) => Number.isSafeInteger(value) && value > 0;
 const failed = (state) => ({ state, profile: null });
 export function classifyStudent(row, userId) {
-  if (!row || row.user_id !== userId || !positiveId(row.id)) return failed("verification_failed");
+  if (typeof userId !== "string" || !userId || !row || row.user_id !== userId || !positiveId(row.id)) return failed("verification_failed");
   if (typeof row.approval_status !== "string" || typeof row.is_active !== "boolean") return failed("verification_failed");
   // Unknown status labels never grant access. These labels must be checked
   // against the live constraints/enum before account restoration is approved.
@@ -16,17 +16,23 @@ export function classifyStudent(row, userId) {
   if (typeof row.student_name !== "string" || !row.student_name.trim()) return failed("verification_failed");
   return { state, profile: { id: row.id, name: row.student_name, classroomId: row.classroom_id, grade: null, classroom: null } };
 }
-export async function inspectOwnStudent(client, userId, { selfVisibilityVerified = false } = {}) {
+// The no-argument function and authenticated EXECUTE/SECURITY DEFINER scope
+// were confirmed by the project owner. Its full output contract is still needed.
+// Validate the returned value at runtime; never invent aliases or JSON wrappers.
+export async function inspectOwnStudent(client, userId, { emptyMeansMissingVerified = false } = {}) {
   try {
-    const result = await client.from("students")
-      .select("id,user_id,student_name,classroom_id,approval_status,is_active")
-      .eq("user_id", userId).limit(2);
-    if (result.error || !Array.isArray(result.data)) return failed("verification_failed");
-    // An empty SELECT under unknown RLS can mean a hidden existing profile.
-    // Production never labels it 'missing' until visibility is verified.
-    if (!result.data.length) return failed(selfVisibilityVerified ? "missing" : "profile_unavailable");
-    if (result.data.length !== 1) return failed("verification_failed");
-    const student = classifyStudent(result.data[0], userId);
+    const result = await client.rpc("get_my_student_profile");
+    if (result.error) return failed("verification_failed");
+    if (result.data === null || (Array.isArray(result.data) && result.data.length === 0)) {
+      // A function may filter pending/stopped records or use an INNER JOIN.
+      // Only its complete definition can establish that empty means absent.
+      return failed(emptyMeansMissingVerified ? "missing" : "profile_unavailable");
+    }
+    const rows = Array.isArray(result.data) ? result.data : [result.data];
+    if (rows.length !== 1) return failed("verification_failed");
+    // Require the actual, known student columns and matching owner. A differently
+    // shaped RPC result fails closed pending its verified field mapping.
+    const student = classifyStudent(rows[0], userId);
     if (!student.profile || !positiveId(student.profile.classroomId)) return student;
     try {
     const classroom = await client.from("classrooms").select("id,name,grade_id").eq("id", student.profile.classroomId).maybeSingle();
@@ -59,6 +65,6 @@ export const studentMessages = Object.freeze({
   suspended: "حسابك موقوف حاليًا. تواصل مع معلمك قبل متابعة الأنشطة.",
   rejected: "لم يُعتمد طلبك. تواصل مع معلمك لمراجعة البيانات.",
   missing: "أكمل ملفك الدراسي وأرسل طلب الاعتماد.",
-  profile_unavailable: "لم نتمكن من إثبات وجود ملفك الدراسي أو غيابه. قد تمنع صلاحيات قاعدة البيانات ظهوره؛ لن نُنشئ ملفًا مكررًا.",
+  profile_unavailable: "أعادت دالة الملف الدراسي نتيجة فارغة ولم نتأكد من دلالتها. أعد المحاولة أو تواصل مع معلمك؛ لن نُنشئ ملفًا مكررًا.",
   verification_failed: "تعذر التحقق من حالة حسابك. هذا لا يعني أن ملفك ناقص أو أن طلبك مرفوض.",
 });

@@ -13,7 +13,7 @@ function fixture({ student = row, rows, admin = false, profileError = null, loca
   const calls = [];
   const client = {
     auth: { getUser: async () => ({ data: userError ? null : { user: { id: "synthetic-user" } }, error: userError }) },
-    rpc: async (name, args) => { calls.push(["rpc", name, args]); return { data: name === "is_admin" ? admin : { score: 8, total_points: 10 }, error: null }; },
+    rpc: async (name, args) => { calls.push(["rpc", name, args]); return { data: name === "is_admin" ? admin : name === "get_my_student_profile" ? rows ?? (student ? [student] : []) : { score: 8, total_points: 10 }, error: name === "get_my_student_profile" ? profileError : null }; },
     storage: { from: (bucket) => ({ upload: async (path, file, options) => { calls.push(["upload", bucket, path, file.size, options]); return { error: null }; } }) },
     from: (table) => {
       calls.push(["from", table]);
@@ -47,14 +47,13 @@ test("only an owned, well-formed active approved profile grants student access",
   }
   for (const change of [{ status: "verifying" }, { status: "error" }, { status: "expired" }, { role: null }, { signingOut: true }]) assert.equal(canAccessStudent({ ...approved, ...change }), false);
 });
-test("student lookup filters by verified auth UID and never reads email or a public directory", async () => {
+test("student lookup uses the scoped no-argument RPC and never reads students directly", async () => {
   const f = fixture(); const result = await inspectOwnStudent(f.client, row.user_id);
   assert.equal(result.state, "approved"); assert.equal(result.profile.name, row.student_name);
   assert.equal(result.profile.grade, "الصف الثاني"); assert.equal(result.profile.classroom, "أ");
-  assert.ok(f.calls.some(call => call[0] === "students" && call[1] === "eq" && call[2] === "user_id" && call[3] === row.user_id));
-  assert.ok(f.calls.some(call => call[0] === "students" && call[1] === "limit" && call[2] === 2));
+  assert.deepEqual(f.calls.find(call => call[0] === "rpc"), ["rpc", "get_my_student_profile", undefined]);
+  assert.ok(!f.calls.some(call => call[0] === "from" && call[1] === "students"));
   assert.ok(!JSON.stringify(f.calls).includes("email"));
-  assert.ok(!f.calls.some(call => call[0] === "rpc"));
   assert.ok(!JSON.stringify(result).includes("user_id"));
 });
 for (const options of [{ locationError: true }, { locationThrows: true }]) {
@@ -70,7 +69,7 @@ test("connection/RLS uncertainty is never treated as a missing profile or comple
     assert.ok(["profile_unavailable", "verification_failed"].includes(student.state));
     assert.equal(studentDestination({ ...approved, role: null, student }), null);
   }
-  assert.equal((await inspectOwnStudent(fixture({ student: null }).client, row.user_id, { selfVisibilityVerified: true })).state, "missing");
+  assert.equal((await inspectOwnStudent(fixture({ student: null }).client, row.user_id, { emptyMeansMissingVerified: true })).state, "missing");
 });
 test("routing distinguishes approved, pending, missing, stopped, expired and offline", () => {
   assert.equal(studentDestination(approved), "/quizzes");
@@ -103,7 +102,7 @@ for (const [action, payload] of [["quiz.load", { id: 6 }], ["quiz.submit", { id:
     for (const state of ["pending", "suspended", "rejected"]) {
       const f = fixture({ student: { ...row, approval_status: state } });
       assert.equal((await handleStudentRequest(request(action, payload), f.factory)).status, 403);
-      assert.ok(!f.calls.some(call => call[0] === "rpc" && call[1] !== "is_admin"));
+      assert.ok(!f.calls.some(call => call[0] === "rpc" && !["is_admin", "get_my_student_profile"].includes(call[1])));
       assert.ok(!f.calls.some(call => ["challenges", "challenge_submissions"].includes(call[1]) && call[0] === "from"));
     }
   });

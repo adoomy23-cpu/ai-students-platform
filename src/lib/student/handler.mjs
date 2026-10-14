@@ -1,5 +1,7 @@
 import { authorizeRequest, privateJson } from "../auth/server-access.mjs";
 import { readLimitedJson, sameSiteRequest } from "../admin/handler.mjs";
+import { practiceQuizQuestions, gradePracticeQuiz, validPracticeAnswers } from "./practice-quiz.mjs";
+import { studentQuizResponse, studentScoreResponse } from "./quiz-response.mjs";
 import { inspectOwnStudent, enrollmentContract } from "./profile.mjs";
 const positiveId = (id) => Number.isSafeInteger(id) && id > 0;
 const exact = (p, keys) => p && typeof p === "object" && !Array.isArray(p) && Object.keys(p).length === keys.length && keys.every(key => Object.hasOwn(p, key));
@@ -38,6 +40,8 @@ export async function handleStudentRequest(request, createUserClient) {
     } catch { return errorResponse("database_error", 502); }
   }
   const validators = {
+    "practice.load": p => exact(p, []),
+    "practice.submit": p => exact(p, ["answers"]) && validPracticeAnswers(p.answers),
     "quiz.load": (p) => exact(p, ["id"]) && positiveId(p.id),
     "quiz.submit": (p) => exact(p, ["id", "answers"]) && positiveId(p.id) && p.answers && typeof p.answers === "object" && !Array.isArray(p.answers) && Object.keys(p.answers).length <= 500 && Object.entries(p.answers).every(([key, value]) => /^[1-9]\d*$/.test(key) && positiveId(Number(key)) && positiveId(value)),
     "challenge.load": (p) => exact(p, ["id"]) && positiveId(p.id),
@@ -49,6 +53,8 @@ export async function handleStudentRequest(request, createUserClient) {
   const { client, student } = access;
   const p = body.payload;
   try {
+    if (body.action === "practice.load") return privateJson({ data: { questions: practiceQuizQuestions() }, error: null });
+    if (body.action === "practice.submit") return privateJson({ data: gradePracticeQuiz(p.answers), error: null });
     let result;
     if (body.action === "quiz.load") result = await client.rpc("get_quiz_for_student", { p_quiz_id: p.id });
     if (body.action === "quiz.submit") result = await client.rpc("submit_quiz_attempt", { p_quiz_id: p.id, p_student_id: student.id, p_answers: p.answers });
@@ -67,6 +73,12 @@ export async function handleStudentRequest(request, createUserClient) {
       result = await client.from("challenge_submissions").insert({ challenge_id: p.id, student_id: student.id, submission_text: text, image_url: image, file_url: file, status: "submitted" });
     }
     if (!result || result.error) return errorResponse("database_error", 502);
+    if (body.action === "quiz.load" || body.action === "quiz.submit") {
+      const safeData = body.action === "quiz.load" ? studentQuizResponse(result.data, p.id) : studentScoreResponse(result.data);
+      if (!safeData) return errorResponse("verification_failed", 503);
+      return privateJson({ data: safeData, error: null });
+    }
+    if (body.action === "challenge.submit") return privateJson({ data: null, error: null });
     return privateJson({ data: result.data ?? null, error: null });
   } catch { return errorResponse("database_error", 502); }
 }

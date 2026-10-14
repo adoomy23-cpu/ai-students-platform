@@ -51,7 +51,7 @@ test("same-route and pending-status renders do not repeatedly replace their own 
   assert.deepEqual(runRedirect(approved, "/quizzes").calls, []);
   assert.deepEqual(runRedirect({ status: "authenticated", role: null, student: { state: "pending" } }, "/pending-approval", { approvedOnly: true }).calls, []);
 });
-test("an empty direct table read remains a verification error, not a pending or missing account", async () => {
+test("an unproven empty profile RPC remains a verification error, not a pending or missing account", async () => {
   const response = Response.json({ authenticated: true, role: null, student: { state: "profile_unavailable", profile: null } });
   const access = await fetchAccountAccess("synthetic-token", { fetcher: async () => response });
   assert.equal(access.status, "error"); assert.equal(access.student.state, "profile_unavailable");

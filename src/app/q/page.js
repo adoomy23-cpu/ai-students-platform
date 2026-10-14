@@ -1,66 +1,70 @@
 "use client";
 
 import SchoolIcon from "../../components/brand/SchoolIcon";
-import { Button, Card, PageSurface } from "../../components/platform/PlatformUI";
+import { Button, Card, EmptyState, Feedback, PageSurface } from "../../components/platform/PlatformUI";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { requestStudent } from "../../lib/student/browser-client";
 
-const questions = [
-  {
-    question: "ما المقصود بالذكاء الاصطناعي؟",
-    options: [
-      "تقنية تجعل الأجهزة تنفذ مهامًا تحتاج إلى ذكاء",
-      "نوع من أنواع الإنترنت",
-      "برنامج للرسم فقط",
-      "جهاز لتخزين الملفات",
-    ],
-    correct: 0,
-  },
-  {
-    question: "هل يستطيع الذكاء الاصطناعي التعلم من البيانات؟",
-    options: ["نعم", "لا"],
-    correct: 0,
-  },
-  {
-    question: "هل يمكن للذكاء الاصطناعي أن يخطئ؟",
-    options: ["نعم، قد يخطئ", "لا، لا يخطئ أبدًا"],
-    correct: 0,
-  },
-];
 
 export default function QuizPage() {
+  const [questions, setQuestions] = useState([]);
+  const [answers, setAnswers] = useState([]);
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const [revision, setRevision] = useState(0);
+  const [loadedRevision, setLoadedRevision] = useState(null);
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    requestStudent("practice.load", {}, { signal: controller.signal }).then(result => {
+      if (controller.signal.aborted) return;
+      setLoadedRevision(revision);
+      if (result.error || !Array.isArray(result.data?.questions) || result.data.questions.length === 0) setMessage("تعذر تحميل الاختبار التجريبي. أعد المحاولة.");
+      else { setQuestions(result.data.questions); setMessage(""); }
+    }).catch(() => {
+      if (controller.signal.aborted) return;
+      setLoadedRevision(revision);
+      setMessage("تعذر تحميل الاختبار التجريبي. أعد المحاولة.");
+    });
+    return () => controller.abort();
+  }, [revision]);
   const question = questions[current];
 
-  function nextQuestion() {
-    if (selected === null) return;
-
-    if (selected === question.correct) {
-      setScore((prev) => prev + 1);
-    }
-
+  async function nextQuestion() {
+    if (selected === null || sending) return;
+    const nextAnswers = [...answers, selected];
     if (current < questions.length - 1) {
-      setCurrent((prev) => prev + 1);
+      setAnswers(nextAnswers);
+      setCurrent(prev => prev + 1);
       setSelected(null);
-    } else {
-      setFinished(true);
+      return;
     }
+    setSending(true); setMessage("");
+    try {
+      const result = await requestStudent("practice.submit", { answers: nextAnswers });
+      if (result.error || !Number.isFinite(result.data?.score)) { setMessage("تعذر التحقق من النتيجة. أعد المحاولة."); return; }
+      setScore(result.data.score);
+      setFinished(true);
+    } finally { setSending(false); }
   }
 
   function restartQuiz() {
+    setAnswers([]);
+    setMessage("");
     setCurrent(0);
     setSelected(null);
     setScore(0);
     setFinished(false);
   }
 
+  if (loadedRevision !== revision) return <PageSurface style={styles.page}><EmptyState loading>جارٍ تحميل الاختبار…</EmptyState></PageSurface>;
+  if (!question) return <PageSurface style={styles.page}><Feedback tone="error">{message || "الاختبار غير متاح."}</Feedback><Button icon="clock" onClick={() => setRevision(value => value + 1)}>إعادة المحاولة</Button></PageSurface>;
   if (finished) {
-    const finalScore =
-    score + (selected === question.correct ? 1 : 0);
 
     return (
     <PageSurface style={styles.page}>
@@ -73,7 +77,7 @@ export default function QuizPage() {
     <div style={styles.score}>
     نتيجتك
     <strong style={styles.scoreNumber}>
-    {finalScore} / {questions.length}
+    {score} / {questions.length}
     </strong>
     </div>
 
@@ -133,15 +137,16 @@ export default function QuizPage() {
   ))}
   </div>
 
+  {message && <Feedback tone="error">{message}</Feedback>}
   <Button variant="primary"
   onClick={nextQuestion}
-  disabled={selected === null}
+  disabled={selected === null || sending}
   style={{
       ...styles.button,
       opacity: selected === null ? 0.5 : 1,
     }}
   >
-  {current === questions.length - 1
+  {sending ? "جارٍ التحقق…" : current === questions.length - 1
     ? "عرض النتيجة"
     : "السؤال التالي ←"}
   </Button>
