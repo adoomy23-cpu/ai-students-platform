@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function AdminPage() {
+  const router = useRouter();
   const [active, setActive] = useState("الرئيسية");
 
   const sections = [
@@ -83,7 +85,7 @@ export default function AdminPage() {
 
   function handleSection(section) {
     if (section.href) {
-      window.location.href = section.href;
+      router.push(section.href);
       return;
     }
 
